@@ -17,8 +17,8 @@ export const kPrefsGetPrefs = "prefs_get_prefs";
 export const kPrefsSetPrefs = "prefs_set_prefs";
 
 export interface PrefsProvider {
-  prefs() : Prefs;
-  setPrefs(prefs: Record<string,unknown>) : void;
+  prefs(): Prefs;
+  setPrefs(prefs: Record<string, unknown>): void;
 }
 
 export interface MarkdownPrefs {
@@ -66,6 +66,9 @@ export interface Prefs extends MarkdownPrefs {
 
   // code editing (native settings)
   readonly lineNumbers: boolean;
+
+  // latex: macros whose braced content should be treated as Markdown in the editor
+  readonly latexMarkdownMacros: readonly string[];
 }
 
 export function defaultMarkdownPrefs(): MarkdownPrefs {
@@ -78,7 +81,7 @@ export function defaultMarkdownPrefs(): MarkdownPrefs {
   }
 }
 
-export function defaultPrefs() : Prefs {
+export function defaultPrefs(): Prefs {
   return {
     // view
     showOutline: false,
@@ -103,7 +106,7 @@ export function defaultPrefs() : Prefs {
 
     // markdown
     ...defaultMarkdownPrefs(),
-   
+
     // citations
     zoteroUseBetterBibtex: false,
     bibliographyDefaultType: 'bib',
@@ -119,6 +122,9 @@ export function defaultPrefs() : Prefs {
     showWhitespace: false,
     blinkingCursor: true,
     quickSuggestions: true
+    ,
+    // latex macro allowlist (empty by default)
+    latexMarkdownMacros: []
   }
 }
 

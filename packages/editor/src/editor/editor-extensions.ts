@@ -110,6 +110,7 @@ import nodeDefinitionList from '../nodes/definition_list/definition_list';
 import nodeUserComment from '../nodes/user_comment/user_comment';
 import nodeShortcodeBlock from '../nodes/shortcode_block';
 import nodeHtmlPreserve from '../nodes/html_preserve';
+import nodeExam from '../nodes/exam/exam';
 
 // extension/plugin factories
 import { aceExtension } from '../optional/ace/ace';
@@ -119,10 +120,10 @@ import { CodeViewExtensionFn, CodeViewOptions } from '../api/codeview';
 import { ContextMenuHandlerFn } from '../api/menu';
 
 export function initExtensions(
-  context: ExtensionContext, 
+  context: ExtensionContext,
   extensions?: Array<Extension | ExtensionFn>,
   codeViewExtension?: CodeViewExtensionFn)
-: ExtensionManager {
+  : ExtensionManager {
   // create extension manager
   const manager = new ExtensionManager(context);
 
@@ -171,6 +172,7 @@ export function initExtensions(
     behaviorRemoveSection,
 
     // nodes
+    nodeExam,
     nodeDiv,
     nodeFootnote,
     nodeYamlMetadata,
@@ -221,7 +223,7 @@ export function initExtensions(
   // provide ace code view extension if requested
   if (context.options.codeEditor === 'ace' && context.ui.chunks) {
     codeViewExtension = aceExtension;
-  } 
+  }
   // register code view extension
   if (codeViewExtension) {
     manager.register([codeViewExtension(codeViews)]);

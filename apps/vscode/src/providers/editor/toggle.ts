@@ -123,7 +123,7 @@ export async function reopenEditorInVisualMode(
   if (hasHooks()) {
     // note pending switch to visual
     VisualEditorProvider.recordPendingSwitchToVisual(document);
-    commands.executeCommand('positron.reopenWith', document.uri, 'quarto.visualEditor');
+    commands.executeCommand('positron.reopenWith', document.uri, 'quarto.examVisualEditor');
   } else {
     // save then close
     await commands.executeCommand("workbench.action.files.save");

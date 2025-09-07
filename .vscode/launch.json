@@ -1,3 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Quarto Exam Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/apps/vscode"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/apps/vscode/out/**/*.js"
+      ]
+    }
+  ]
+}
+
 // A launch configuration that compiles the extension and then opens it inside a new window
 // Use IntelliSense to learn about possible attributes.
 // Hover to view descriptions of existing attributes.

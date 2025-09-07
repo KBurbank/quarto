@@ -50,6 +50,7 @@ const kQuartoEditorMarkdownWrap = "quarto.visualEditor.markdownWrap";
 const kQuartoEditorMarkdownWrapColumn = "quarto.visualEditor.markdownWrapColumn";
 const kQuartoEditorMarkdownReferences = "quarto.visualEditor.markdownReferences";
 const kQuartoEditorMarkdownReferenceLinks = "quarto.visualEditor.markdownReferenceLinks";
+const kQuartoEditorLatexMarkdownMacros = "quarto.visualEditor.latexMarkdownMacros";
 
 const kMonitoredConfigurations = [
   kEditorAutoClosingBrackets,
@@ -123,6 +124,9 @@ export async function vscodePrefsServer(
 
       // quarto code editor settings
       lineNumbers: configuration.get<boolean>(kQuartoEditorLineNumbers, defaults.lineNumbers),
+
+      // latex macro allowlist
+      latexMarkdownMacros: configuration.get<string[]>(kQuartoEditorLatexMarkdownMacros, defaults.latexMarkdownMacros as string[]),
     };
     return prefs;
   };

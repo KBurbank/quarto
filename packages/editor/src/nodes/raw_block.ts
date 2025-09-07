@@ -38,10 +38,15 @@ import { kHTMLFormat, kTexFormat, editRawBlockCommand, isRawHTMLFormat } from '.
 import { OmniInsert, OmniInsertGroup } from '../api/omni_insert';
 import { kRawInlineFormat, kRawInlineContent } from '../marks/raw_inline/raw_inline';
 
+let isLatexBeginOrEndRef: (str: string) => boolean | null | RegExpMatchArray | "" = (str: string) => defaultIsLatexBeginOrEnd(str);
+
 const extension = (context: ExtensionContext): Extension | null => {
   const { pandocExtensions, pandocCapabilities, ui } = context;
 
   const rawAttribute = pandocExtensions.raw_attribute;
+
+  // default behavior: treat any begin/end as latex delimiters
+  isLatexBeginOrEndRef = (str: string) => defaultIsLatexBeginOrEnd(str);
 
   return {
     nodes: [
@@ -107,24 +112,26 @@ const extension = (context: ExtensionContext): Extension | null => {
 
           // ensure that usethis badges comment ends up in it's own block
           preprocessor: (markdown: string) => {
-            return markdown.replace(/([^\n])(\n^<!-- badges: end -->$)/gm, (_match, p1, p2) => {
+            // ensure badges end comment is on its own line
+            const result = markdown.replace(/([^\n])(\n^<!-- badges: end -->$)/gm, (_match, p1, p2) => {
               return p1 + '\n' + p2;
             });
+            return result;
           },
 
           tokensFilter: (tokens: PandocToken[]) => {
             const filtered: PandocToken[] = [];
-            for (let i=0; i<tokens.length; i++) {
-              if (isSingleLineHtmlRawBlock(tokens[i]) && 
-                  isParaOrPlain(tokens[i+1]) &&
-                  isSingleLineHtmlRawBlock(tokens[i+2])) {
+            for (let i = 0; i < tokens.length; i++) {
+              if (isSingleLineHtmlRawBlock(tokens[i]) &&
+                isParaOrPlain(tokens[i + 1]) &&
+                isSingleLineHtmlRawBlock(tokens[i + 2])) {
 
                 const beginTag = (tokens[i].c[kRawBlockContent] as string).trimRight();
-                const endTag = (tokens[i+2].c[kRawBlockContent] as string).trimRight();
+                const endTag = (tokens[i + 2].c[kRawBlockContent] as string).trimRight();
                 const match = beginTag.match(/^<(.*?)>$/);
                 if (match && (endTag === "</" + match[1] + ">")) {
-                 
-                  const innerContent = tokens[i+1].c as PandocToken[];
+
+                  const innerContent = tokens[i + 1].c as PandocToken[];
                   innerContent.unshift({
                     t: PandocTokenType.RawInline,
                     c: ["html", beginTag]
@@ -143,8 +150,8 @@ const extension = (context: ExtensionContext): Extension | null => {
                 }
               } else {
                 filtered.push(tokens[i]);
-              } 
-            } 
+              }
+            }
 
             return filtered;
           },
@@ -177,16 +184,16 @@ const extension = (context: ExtensionContext): Extension | null => {
                 output.writeRawMarkdown(node.textContent);
               });
 
-            // raw block with embedded ``` (e.g. a commented out Rmd code chunk) needs
-            // extra backticks on the outside to prevent the rmd chunk end backticks
-            // from being considered the end of the raw html block.
+              // raw block with embedded ``` (e.g. a commented out Rmd code chunk) needs
+              // extra backticks on the outside to prevent the rmd chunk end backticks
+              // from being considered the end of the raw html block.
             } else if (node.textContent.includes("\n```")) {
               // find the ``` standing by itself on a line
               const matches: RegExpExecArray[] = [];
               const embeddedTickRegEx = /\n(`{3,})\s*?\n/g;
               embeddedTickRegEx.lastIndex = 0;
               let match: RegExpExecArray | null = null;
-               // tslint:disable-next-line no-conditional-assignment
+              // tslint:disable-next-line no-conditional-assignment
               while ((match = embeddedTickRegEx.exec(node.textContent))) {
                 matches.push(match);
               }
@@ -291,7 +298,7 @@ function readPandocRawBlock(schema: Schema, tok: PandocToken, writer: Prosemirro
 
 export function readAsInlineTex(tex: string) {
   tex = tex.trimRight();
-  if (tex.split('\n').length === 1){
+  if (tex.split('\n').length === 1) {
     return !isLatexBeginOrEnd(tex);
   } else {
     return false;
@@ -299,25 +306,29 @@ export function readAsInlineTex(tex: string) {
 }
 
 function isParagraphWrappingMultilineRaw(tok: PandocToken) {
-  return isSingleChildParagraph(tok) && 
-         tok.c[0].t === PandocTokenType.RawInline &&
-         isMultilineString(tok.c[0].c[kRawBlockContent]);
+  return isSingleChildParagraph(tok) &&
+    tok.c[0].t === PandocTokenType.RawInline &&
+    isMultilineString(tok.c[0].c[kRawBlockContent]);
 }
 
 function isParagraphWrappingLatexBeginOrEnd(tok: PandocToken) {
   return isSingleChildParagraph(tok) &&
-         tok.c[0].t === PandocTokenType.Str &&
-         isLatexBeginOrEnd(tok.c[0].c);
+    tok.c[0].t === PandocTokenType.Str &&
+    isLatexBeginOrEnd(tok.c[0].c);
 }
 
 function isParagraphWrappingRawLatexBeginOrEnd(tok: PandocToken) {
   return isSingleChildParagraph(tok) &&
-         (tok.c[0].t === PandocTokenType.RawInline &&
-         tok.c[0].c[kRawInlineFormat] === kTexFormat &&
-         isLatexBeginOrEnd(tok.c[0].c[kRawInlineContent]));
+    (tok.c[0].t === PandocTokenType.RawInline &&
+      tok.c[0].c[kRawInlineFormat] === kTexFormat &&
+      isLatexBeginOrEnd(tok.c[0].c[kRawInlineContent]));
 }
 
 function isLatexBeginOrEnd(str: string) {
+  return isLatexBeginOrEndRef(str);
+}
+
+function defaultIsLatexBeginOrEnd(str: string) {
   return str && str.trimLeft().match(/\\(begin|end)/);
 }
 

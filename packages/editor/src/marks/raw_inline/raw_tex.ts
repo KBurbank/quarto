@@ -4,8 +4,7 @@
  * Copyright (C) 2022 by Posit Software, PBC
  *
  * Unless you have received this program directly from Posit Software pursuant
- * to the terms of a commercial license agreement with Posit Software, then
- * this program is licensed to you under the terms of version 3 of the
+ * to the terms of version 3 of the
  * GNU Affero General Public License. This program is distributed WITHOUT
  * ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING THOSE OF NON-INFRINGEMENT,
  * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Please refer to the
@@ -105,7 +104,7 @@ const extension = (context: ExtensionContext): Extension | null => {
     },
 
     inputRules: (schema: Schema, filter: MarkInputRuleFilter) => {
-      return [texInputRule(schema, filter)];
+      return [texInputRule(schema, filter, context)];
     },
 
     // plugin to add highlighting decorations
@@ -144,7 +143,7 @@ const extension = (context: ExtensionContext): Extension | null => {
   };
 };
 
-function texInputRule(schema: Schema, filter: MarkInputRuleFilter) {
+function texInputRule(schema: Schema, filter: MarkInputRuleFilter, context: ExtensionContext) {
   return new InputRule(/(^| )\\$/, (state: EditorState) => {
     const rawTexMark = schema.marks.raw_tex;
 
@@ -175,7 +174,18 @@ function texInputRule(schema: Schema, filter: MarkInputRuleFilter) {
         const length = texLength(text);
         if (length > 1) {
           const startTex = tr.selection.from - 1;
-          tr.addMark(startTex, startTex + length, mark);
+          // If this is an allowlisted macro, don't extend raw_tex over its braced content.
+          // We only mark the command itself (e.g., \\macro) and let inner braces be normal markdown.
+          const allow = new Set((context.options.latexMarkdownMacros || []) as string[]);
+          // Match \\Name{ or \\Name[ -- extract Name
+          const cmdMatch = text.match(/^\\([A-Za-z@]+)(?=[{\[])/);
+          if (cmdMatch && allow.has(cmdMatch[1])) {
+            // mark only the command name (\\Name)
+            const cmdLen = 1 + cmdMatch[1].length; // backslash + name
+            tr.addMark(startTex, startTex + cmdLen, mark);
+          } else {
+            tr.addMark(startTex, startTex + length, mark);
+          }
           return tr;
         }
       }

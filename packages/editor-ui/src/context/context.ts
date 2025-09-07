@@ -17,10 +17,10 @@ import { JsonRpcRequestTransport, PromiseQueue } from 'core';
 
 import { codeMirrorExtension } from "editor-codemirror";
 
-import { 
-  EditorDialogs, 
-  Prefs, 
-  EditorUISpelling, 
+import {
+  EditorDialogs,
+  Prefs,
+  EditorUISpelling,
   MathjaxTypesetResult,
   MathServer,
   EditorServer,
@@ -43,14 +43,14 @@ import {
 
 
 export interface EditorPrefs {
-  prefs: () => Prefs, 
-  setPrefs: (prefs: Record<string,unknown>) => void
+  prefs: () => Prefs,
+  setPrefs: (prefs: Record<string, unknown>) => void
 }
 
 export interface EditorProviders {
   server: EditorServer,
   services: EditorServices,
-  request: JsonRpcRequestTransport, 
+  request: JsonRpcRequestTransport,
   uiContext: EditorUIContext,
   prefs: () => EditorPrefs,
   dialogs: () => EditorDialogs,
@@ -59,10 +59,10 @@ export interface EditorProviders {
   extensions?: Array<Extension | ExtensionFn>
 }
 
-export function editorContext(providers: EditorProviders) : EditorContext {
-  
+export function editorContext(providers: EditorProviders): EditorContext {
+
   const uiTools = new UITools();
-  
+
   const ui = {
     dialogs: providers.dialogs(),
     display: providers.display(),
@@ -75,11 +75,11 @@ export function editorContext(providers: EditorProviders) : EditorContext {
   };
 
 
-  const context : EditorContext = { 
-    server: providers.server, 
-    ui, 
+  const context: EditorContext = {
+    server: providers.server,
+    ui,
     extensions: providers.extensions,
-    codeViewExtension: codeMirrorExtension 
+    codeViewExtension: codeMirrorExtension
   };
 
   return context;
@@ -105,8 +105,8 @@ export function editorMath(
       const typesetFn = () => {
         text = text.replace(/^\$\$?/, "").replace(/\$\$?$/, "");
         return server.mathjaxTypeset(
-          text, 
-          { 
+          text,
+          {
             format: "data-uri",
             theme: prefs().prefs().darkMode ? "dark" : "light",
             scale: 1,
@@ -135,7 +135,7 @@ export function editorMath(
 
 function editorPrefs(provider: () => EditorPrefs): EditorUIPrefs {
   return {
-    realtimeSpelling() : boolean {
+    realtimeSpelling(): boolean {
       return provider().prefs().realtimeSpelling;
     },
     darkMode(): boolean {
@@ -174,7 +174,7 @@ function editorPrefs(provider: () => EditorPrefs): EditorUIPrefs {
     setCitationDefaultInText(citationDefaultInText: boolean) {
       provider().setPrefs({ citationDefaultInText });
     },
-    spacesForTab: ()=> {
+    spacesForTab: () => {
       return provider().prefs().spacesForTab;
     },
     tabWidth: () => {
@@ -197,13 +197,17 @@ function editorPrefs(provider: () => EditorPrefs): EditorUIPrefs {
     },
     quickSuggestions: () => {
       return provider().prefs().quickSuggestions;
+    },
+    // expose environment allowlist; reuse macro list until a separate setting is added
+    latexMarkdownEnvironments: () => {
+      return provider().prefs().latexMarkdownMacros as unknown as string[];
     }
   };
 }
 
 
 
-function editorSpelling(provider: () => EditorUISpelling) : EditorUISpelling {
+function editorSpelling(provider: () => EditorUISpelling): EditorUISpelling {
   return {
     checkWords(words: string[]): string[] {
       return provider().checkWords(words);

@@ -275,7 +275,7 @@ export class VisualEditorProvider implements CustomTextEditorProvider {
     return providerRegistration;
   }
 
-  public static readonly viewType = "quarto.visualEditor";
+  public static readonly viewType = "quarto.examVisualEditor";
 
   public static recordPendingSwitchToSource(document: TextDocument) {
     this.visualEditorPendingSwitchToSource.add(document.uri.toString());

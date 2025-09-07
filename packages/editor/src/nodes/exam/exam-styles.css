@@ -1,0 +1,21 @@
+.part-header {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.part-content {
+  margin-left: 0.5rem;
+}
+.question-header {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.question-content {
+  margin-left: 0.5rem;
+}
+.subpart-header {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.subpart-content {
+  margin-left: 0.5rem;
+}

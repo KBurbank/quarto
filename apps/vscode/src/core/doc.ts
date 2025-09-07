@@ -118,7 +118,7 @@ export function isMarkdownDoc(document?: vscode.TextDocument) {
 
 export function quartoCanRenderMarkdown(document: vscode.TextDocument) {
   const ext = extname(document.uri.toString()).toLowerCase();
-  return [".qmd", ".rmd", ".md"].includes(ext);
+  return [".qmd", ".rmd", ".md", ".qexam"].includes(ext);
 }
 
 export function quartoCanRenderScript(document: vscode.TextDocument) {

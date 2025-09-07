@@ -165,6 +165,8 @@ export interface EditorUIPrefs {
   showWhitespace: () => boolean,
   blinkingCursor: () => boolean,
   quickSuggestions: () => boolean;
+  // optional: names of environments to allow Markdown within (used by raw_block)
+  latexMarkdownEnvironments?: () => string[];
 }
 
 

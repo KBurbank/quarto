@@ -1,9 +1,9 @@
 {
   "name": "quarto",
-  "displayName": "Quarto",
+  "displayName": "Quarto Exam",
   "description": "Extension for the Quarto scientific and technical publishing system.",
   "author": "quarto",
-  "publisher": "quarto",
+  "publisher": "kendra",
   "icon": "assets/logo/quarto.png",
   "license": "agpl-3.0",
   "keywords": [
@@ -35,7 +35,7 @@
   "browser": "./browser.js",
   "activationEvents": [
     "onLanguage:r",
-    "workspaceContains:**/*.{qmd,rmd}",
+    "workspaceContains:**/*.{qmd,rmd,qexam}",
     "workspaceContains:**/_quarto.{yml,yaml}",
     "workspaceContains:**/_brand.{yml,yaml}",
     "workspaceContains:**/_extension.{yml,yaml}",
@@ -55,7 +55,8 @@
         ],
         "extensions": [
           ".qmd",
-          ".rmd"
+          ".rmd",
+          ".qexam"
         ],
         "icon": {
           "light": "./assets/icon/qmd.svg",
@@ -209,11 +210,11 @@
     },
     "customEditors": [
       {
-        "viewType": "quarto.visualEditor",
+        "viewType": "quarto.examVisualEditor",
         "displayName": "Quarto Visual Editor",
         "selector": [
           {
-            "filenamePattern": "*.{md,qmd}"
+            "filenamePattern": "*.{md,qmd,qexam}"
           }
         ],
         "priority": "option"
@@ -444,7 +445,7 @@
           "controlType": "toggle",
           "leftTitle": "Source",
           "rightTitle": "Visual",
-          "toggled": "activeCustomEditorId == 'quarto.visualEditor'"
+          "toggled": "activeCustomEditorId == 'quarto.examVisualEditor'"
         }
       },
       {
@@ -490,13 +491,13 @@
         "command": "quarto.previewContentShortcut",
         "key": "ctrl+shift+l",
         "mac": "cmd+shift+l",
-        "when": "activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
+        "when": "activeCustomEditorId == 'quarto.examVisualEditor' || editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
       },
       {
         "command": "quarto.editInSourceMode",
         "key": "ctrl+shift+f4",
         "mac": "cmd+shift+f4",
-        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+        "when": "activeCustomEditorId == 'quarto.examVisualEditor'"
       },
       {
         "command": "quarto.editInVisualMode",
@@ -518,7 +519,7 @@
       {
         "command": "quarto.runSelection",
         "key": "alt+enter",
-        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+        "when": "activeCustomEditorId == 'quarto.examVisualEditor'"
       },
       {
         "command": "quarto.runCurrent",
@@ -530,7 +531,7 @@
         "command": "quarto.runCurrent",
         "key": "ctrl+enter",
         "mac": "cmd+enter",
-        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+        "when": "activeCustomEditorId == 'quarto.examVisualEditor'"
       },
       {
         "command": "quarto.runCurrentAdvance",
@@ -540,7 +541,7 @@
       {
         "command": "quarto.runCurrentAdvance",
         "key": "shift+enter",
-        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+        "when": "activeCustomEditorId == 'quarto.examVisualEditor'"
       },
       {
         "command": "quarto.runCurrentCell",
@@ -552,7 +553,7 @@
         "command": "quarto.runCurrentCell",
         "key": "ctrl+shift+enter",
         "mac": "cmd+shift+enter",
-        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+        "when": "activeCustomEditorId == 'quarto.examVisualEditor'"
       },
       {
         "command": "quarto.runPreviousCell",
@@ -564,7 +565,7 @@
         "command": "quarto.runPreviousCell",
         "key": "ctrl+alt+p",
         "mac": "cmd+alt+p",
-        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+        "when": "activeCustomEditorId == 'quarto.examVisualEditor'"
       },
       {
         "command": "quarto.runNextCell",
@@ -576,7 +577,7 @@
         "command": "quarto.runNextCell",
         "key": "ctrl+alt+n",
         "mac": "cmd+alt+n",
-        "when": "activeCustomEditorId == 'quarto.visualEditor'"
+        "when": "activeCustomEditorId == 'quarto.examVisualEditor'"
       },
       {
         "command": "quarto.runCellsBelow",
@@ -643,17 +644,17 @@
       "editor/actions/left": [
         {
           "command": "quarto.preview",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.examVisualEditor'",
           "group": "0_preview"
         },
         {
           "command": "quarto.toggleRenderOnSave",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.examVisualEditor'",
           "group": "0_preview"
         },
         {
           "command": "quarto.toggleEditMode",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.examVisualEditor'",
           "group": "1_editor_mode"
         }
       ],
@@ -679,7 +680,7 @@
       "webview/context": [
         {
           "command": "quarto.editInSourceMode",
-          "when": "activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "activeCustomEditorId == 'quarto.examVisualEditor'",
           "group": "navigation"
         }
       ],
@@ -701,7 +702,7 @@
         },
         {
           "command": "quarto.editInSourceMode",
-          "when": "activeCustomEditorId == 'quarto.visualEditor'",
+          "when": "activeCustomEditorId == 'quarto.examVisualEditor'",
           "group": "q_switch"
         },
         {
@@ -716,14 +717,14 @@
         },
         {
           "command": "quarto.previewFormat",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor' || quartoRenderScriptActive",
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.examVisualEditor' || quartoRenderScriptActive",
           "group": "q_zPreview"
         }
       ],
       "editor/title/run": [
         {
           "command": "quarto.preview",
-          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || editorLangId == markdown || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.previewScript",
@@ -804,7 +805,7 @@
         },
         {
           "command": "quarto.previewDiagram",
-          "when": "activeCustomEditorId == 'quarto.visualEditor' || editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
+          "when": "activeCustomEditorId == 'quarto.examVisualEditor' || editorLangId == quarto || editorLangId == mermaid || editorLangId == dot"
         },
         {
           "command": "quarto.showAssist"
@@ -827,39 +828,39 @@
         },
         {
           "command": "quarto.runSelection",
-          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.runCurrent",
-          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.runCurrentCell",
-          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.runCurrentAdvance",
-          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.runPreviousCell",
-          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.runNextCell",
-          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.runCellsBelow",
-          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.runCellsAbove",
-          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.runAllCells",
-          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.visualEditor'"
+          "when": "editorLangId == quarto || activeCustomEditorId == 'quarto.examVisualEditor'"
         },
         {
           "command": "quarto.goToNextCell",
@@ -1319,6 +1320,15 @@
             "error"
           ],
           "markdownDescription": "Log level for the Quarto language server."
+        }
+      ,
+        "quarto.visualEditor.latexMarkdownMacros": {
+          "order": 60,
+          "scope": "resource",
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "markdownDescription": "LaTeX macro names (without \\) whose braced content should be parsed as Markdown in the Visual Editor (e.g., mybox, aside)."
         }
       }
     },

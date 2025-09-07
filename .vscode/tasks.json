@@ -2,6 +2,30 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "build vscode extension",
+      "type": "shell",
+      "command": "PATH=\"/usr/local/opt/node@20/bin:/opt/homebrew/opt/node@20/bin:$PATH\" yarn build-vscode",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "echo": true,
+        "focus": true,
+        "clear": false
+      },
+      "problemMatcher": [
+        "$tsc"
+      ]
+    }
+  ]
+}
+
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
       "type": "npm",
       "script": "watch",
       "problemMatcher": "$tsc-watch",
