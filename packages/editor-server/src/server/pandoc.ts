@@ -21,31 +21,31 @@ import * as uuid from 'uuid';
 
 import { JsonRpcServerMethod } from 'core';
 
-import {
-  BibliographyResult,
-  PandocAst,
-  PandocCapabilitiesResult,
+import { 
+  BibliographyResult, 
+  PandocAst, 
+  PandocCapabilitiesResult, 
   PandocServer,
-  kPandocAstToMarkdown,
-  kPandocGetCapabilities,
-  kPandocListExtensions,
+  kPandocAstToMarkdown, 
+  kPandocGetCapabilities, 
+  kPandocListExtensions, 
   kPandocMarkdownToAst,
   kPandocGetBibliography,
   kPandocAddtoBibliography,
-  kPandocCitationHtml,
+  kPandocCitationHtml, 
 } from "editor-types";
 
 import { projectDirForDocument } from 'quarto-core';
 
-import {
-  appendToJSONBibliography,
-  appendToYAMLBibliography,
-  cslBibliography,
-  generateHTMLBibliography,
+import { 
+  appendToJSONBibliography, 
+  appendToYAMLBibliography, 
+  cslBibliography, 
+  generateHTMLBibliography, 
   generateCSLBibliography,
-  isJsonBibliography,
-  isYamlBibliography,
-  resolveBiblioOptions
+  isJsonBibliography, 
+  isYamlBibliography, 
+  resolveBiblioOptions 
 } from '../core/biblio';
 
 import { runPandoc as pandoc } from '../core/pandoc';
@@ -53,7 +53,7 @@ import { runPandoc as pandoc } from '../core/pandoc';
 import { EditorServerOptions } from './server';
 
 
-export function pandocServer(options: EditorServerOptions): PandocServer {
+export function pandocServer(options: EditorServerOptions) : PandocServer {
 
   // work around change in pandoc 3.2+: https://github.com/jgm/pandoc/issues/9677 by
   // using a custom pandoc writer
@@ -62,7 +62,7 @@ export function pandocServer(options: EditorServerOptions): PandocServer {
     return format.replace(/^markdown(?=[-+]|$)/, customWriterScript);
   }
 
-  async function runPandoc(args: readonly string[] | null, stdin?: string): Promise<string> {
+  async function runPandoc(args: readonly string[] | null, stdin?: string) : Promise<string> {
     return pandoc(options.pandoc, args, stdin);
   }
 
@@ -83,10 +83,9 @@ export function pandocServer(options: EditorServerOptions): PandocServer {
       // ast
       const ast = JSON.parse(await runPandoc(
         ["--from", format,
-          "--abbreviations", path.join(options.pandoc.resourcesDir, 'abbreviations'),
-          "--lua-filter", path.join(options.pandoc.resourcesDir, 'wrap-examclass-terms.lua'),
-          "--to", "json", ...mdOptions],
-        markdown)
+         "--abbreviations", path.join(options.pandoc.resourcesDir, 'abbreviations'),
+         "--to", "json", ...mdOptions],
+         markdown)
       ) as PandocAst;
 
       // heading-ids
@@ -95,8 +94,8 @@ export function pandocServer(options: EditorServerOptions): PandocServer {
       format += "-auto_identifiers-gfm_auto_identifiers";
       const headingIds = await runPandoc(
         ["--from", format,
-          "--to", "plain",
-          "--lua-filter", path.join(options.pandoc.resourcesDir, 'heading-ids.lua'),
+         "--to", "plain",
+         "--lua-filter", path.join(options.pandoc.resourcesDir, 'heading-ids.lua'),
         ],
         markdown
       );
@@ -104,14 +103,14 @@ export function pandocServer(options: EditorServerOptions): PandocServer {
       if (headingIds) {
         ast.heading_ids = headingIds.split('\n').filter(id => id.length !== 0);
       }
-
+  
       return ast;
     },
     async astToMarkdown(ast: PandocAst, format: string, options: string[]): Promise<string> {
-      const markdown = await runPandoc(
+     const markdown = await runPandoc(
         ["--from", "json",
-          "--to", substituteCustomMarkdownWriter(format), ...options],
-        JSON.stringify(ast)
+         "--to", substituteCustomMarkdownWriter(format), ...options],
+         JSON.stringify(ast)
       );
       return markdown;
     },
@@ -196,7 +195,7 @@ export function pandocServer(options: EditorServerOptions): PandocServer {
   };
 }
 
-export function pandocServerMethods(options: EditorServerOptions): Record<string, JsonRpcServerMethod> {
+export function pandocServerMethods(options: EditorServerOptions) : Record<string, JsonRpcServerMethod> {
   const server = pandocServer(options);
   const methods: Record<string, JsonRpcServerMethod> = {
     [kPandocGetCapabilities]: () => server.getCapabilities(),
@@ -209,3 +208,6 @@ export function pandocServerMethods(options: EditorServerOptions): Record<string
   };
   return methods;
 }
+
+
+

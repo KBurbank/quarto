@@ -2,7 +2,7 @@
  * pandoc.ts
  *
  * Copyright (C) 2022 by Posit Software, PBC
- *
+ * 
  * Unless you have received this program directly from Posit Software pursuant
  * to the terms of a commercial license agreement with Posit Software, then
  * this program is licensed to you under the terms of version 3 of the
@@ -23,17 +23,12 @@ export interface PandocServerOptions {
   payloadLimitMb: number;
 }
 
-export async function runPandoc(pandoc: PandocServerOptions, args: readonly string[] | null, stdin?: string): Promise<string> {
+export async function runPandoc(pandoc: PandocServerOptions, args: readonly string[] | null, stdin?: string) : Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = child_process.execFile(pandoc.pandocPath, args, {
-      encoding: "utf-8",
-      maxBuffer: pandoc.payloadLimitMb * 1024 * 1024
-    },
+    const child = child_process.execFile(pandoc.pandocPath, args, { 
+      encoding: "utf-8", 
+      maxBuffer: pandoc.payloadLimitMb * 1024 * 1024 }, 
       (error, stdout, stderr) => {
-        // surface pandoc stderr for debugging (lua filter logs, warnings)
-        if (stderr && stderr.trim().length > 0) {
-          try { console.warn(`[pandoc stderr] ${stderr.trim()}`); } catch { /* ignore */ }
-        }
         if (error) {
           reject(error);
         } else if (child.exitCode !== 0) {
@@ -41,11 +36,11 @@ export async function runPandoc(pandoc: PandocServerOptions, args: readonly stri
         } else {
           resolve(stdout.trim());
         }
-      });
+    });  
     if (stdin) {
       const stdinStream = new stream.Readable();
-      stdinStream.push(stdin);
-      stdinStream.push(null);
+      stdinStream.push(stdin);  
+      stdinStream.push(null);  
       if (child.stdin) {
         child.stdin.on('error', () => {
           // allow errors to be reported by main handler
@@ -57,3 +52,7 @@ export async function runPandoc(pandoc: PandocServerOptions, args: readonly stri
     }
   });
 }
+
+
+
+
