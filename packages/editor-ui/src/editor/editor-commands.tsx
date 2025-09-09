@@ -81,13 +81,13 @@ interface CommandDefs {
 }
 
 import {
-  ArrowUndo16Filled,
+  ArrowUndo16Filled, 
   ArrowUndo16Regular,
-  ArrowRedo16Filled,
+  ArrowRedo16Filled, 
   ArrowRedo16Regular,
   ClearFormatting16Filled,
   ClearFormatting16Regular,
-  TextBold16Filled,
+  TextBold16Filled, 
   TextBold16Regular,
   TextItalic16Filled,
   TextItalic16Regular,
@@ -112,7 +112,7 @@ import {
   Comment16Filled,
   Comment16Regular,
   bundleIcon
-
+  
 } from "@fluentui/react-icons"
 
 const ArrowUndoIcon = bundleIcon(ArrowUndo16Filled, ArrowUndo16Regular);
@@ -268,19 +268,6 @@ function editorCommandDefs(): CommandDefs {
       },
     },
 
-    // Part commands
-    ['Parts'] : {
-      [EditorCommandId.PartInsert]: {
-        menuText: 'Insert Part',
-      },
-      [EditorCommandId.PartIndent]: {
-        menuText: 'Indent Part',
-      },
-      [EditorCommandId.PartOutdent]: {
-        menuText: 'Outdent Part',
-      },
-    },
-
     [t('commands:group_tables')]: {
       [EditorCommandId.TableInsertTable]: {
         icon: <TableIcon />,
@@ -334,9 +321,6 @@ function editorCommandDefs(): CommandDefs {
     },
 
     [t('commands:group_insert')]: {
-      [EditorCommandId.PartInsert]: {
-        menuText: 'Part',
-      },
       [EditorCommandId.OmniInsert]: {
         menuText: t('commands:any_menu_text')
       },
@@ -485,20 +469,8 @@ function editorCommandDefs(): CommandDefs {
       [EditorCommandId.InsertSlideColumns]: {
         menuText: t('commands:slide_columns_menu_text'),
       },
-    },
-
-    // Quarto Exam custom commands
-    ['Exam'] : {
-      [EditorCommandId.ExamIndent]: {
-        menuText: 'Indent Exam Block',
-      },
-      [EditorCommandId.ExamOutdent]: {
-        menuText: 'Outdent Exam Block',
-      },
-      [EditorCommandId.ExamNewBlock]: {
-        menuText: 'New Exam Block',
-      },
     }
 
   };
 }
+

@@ -101,30 +101,30 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
     { command: EditorCommandId.YamlMetadata },
     ...(haveAnyOf(commands, EditorCommandId.RCodeChunk, EditorCommandId.PythonCodeChunk)
       ? [
-        { separator: true },
-        {
-          text: ui.context.translateText('Executable Cell'),
-          subMenu: {
-            items: [
-              ...(pyDefault
-                ? [{ command: EditorCommandId.PythonCodeChunk },
-                { command: EditorCommandId.RCodeChunk }]
-                : [{ command: EditorCommandId.RCodeChunk },
-                { command: EditorCommandId.PythonCodeChunk }]
-              ),
-              { command: EditorCommandId.BashCodeChunk },
-              { command: EditorCommandId.RcppCodeChunk },
-              { command: EditorCommandId.SQLCodeChunk },
-              { command: EditorCommandId.D3CodeChunk },
-              { command: EditorCommandId.StanCodeChunk },
-              { command: EditorCommandId.JuliaCodeChunk },
-              { separator: true },
-              { command: EditorCommandId.MermaidCodeChunk },
-              { command: EditorCommandId.GraphVizCodeChunk }
-            ],
+          { separator: true },
+          {
+            text: ui.context.translateText('Executable Cell'),
+            subMenu: {
+              items: [
+                ...(pyDefault
+                  ? [ { command: EditorCommandId.PythonCodeChunk }, 
+                      { command: EditorCommandId.RCodeChunk } ]  
+                  : [ { command: EditorCommandId.RCodeChunk }, 
+                      { command: EditorCommandId.PythonCodeChunk } ] 
+                ),
+                { command: EditorCommandId.BashCodeChunk },
+                { command: EditorCommandId.RcppCodeChunk },
+                { command: EditorCommandId.SQLCodeChunk },
+                { command: EditorCommandId.D3CodeChunk },
+                { command: EditorCommandId.StanCodeChunk },
+                { command: EditorCommandId.JuliaCodeChunk },
+                { separator: true },
+                { command: EditorCommandId.MermaidCodeChunk },
+                { command: EditorCommandId.GraphVizCodeChunk }
+              ],
+            },
           },
-        },
-      ]
+        ]
       : []),
     { separator: true },
     { command: EditorCommandId.Table },
@@ -133,24 +133,23 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
     { command: EditorCommandId.Shortcode },
     { separator: true },
     { command: EditorCommandId.CodeBlockFormat },
-    { command: EditorCommandId.PartInsert },
     ...(haveAnyOf(commands, EditorCommandId.Citation, EditorCommandId.CrossReference, EditorCommandId.Footnote)
-      ? [
-        { separator: true },
-        { command: EditorCommandId.Citation },
-        { command: EditorCommandId.CrossReference },
-        { command: EditorCommandId.Footnote },
-      ] : []),
+    ? [
+      { separator: true },
+      { command: EditorCommandId.Citation },
+      { command: EditorCommandId.CrossReference },
+      { command: EditorCommandId.Footnote },
+    ] : []),
     ...(haveAnyOf(commands, EditorCommandId.InsertSlideNotes, EditorCommandId.InsertSlidePause, EditorCommandId.InsertSlideColumns)
-      ? [
-        { separator: true },
-        { command: EditorCommandId.InsertSlideColumns },
-        { command: EditorCommandId.InsertSlidePause },
-        { command: EditorCommandId.InsertSlideNotes }
-      ] : []),
+    ? [
+      { separator: true },
+      { command: EditorCommandId.InsertSlideColumns },
+      { command: EditorCommandId.InsertSlidePause },
+      { command: EditorCommandId.InsertSlideNotes }
+    ] : []),
     { separator: true },
     ...(haveAnyOf(commands, EditorCommandId.InlineMath, EditorCommandId.DisplayMath)
-      ? [
+    ? [
         {
           text: ui.context.translateText('LaTeX Math'),
           subMenu: {
@@ -161,21 +160,21 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
           },
         },
       ]
-      : []),
+    : []),
     ...(haveAnyOf(commands, EditorCommandId.DefinitionList)
       ? [
-        {
-          text: ui.context.translateText('Definition'),
-          subMenu: {
-            items: [
-              { command: EditorCommandId.DefinitionList },
-              { separator: true },
-              { command: EditorCommandId.DefinitionTerm },
-              { command: EditorCommandId.DefinitionDescription },
-            ],
+          {
+            text: ui.context.translateText('Definition'),
+            subMenu: {
+              items: [
+                { command: EditorCommandId.DefinitionList },
+                { separator: true },
+                { command: EditorCommandId.DefinitionTerm },
+                { command: EditorCommandId.DefinitionDescription },
+              ],
+            },
           },
-        },
-      ]
+        ]
       : []),
     {
       text: ui.context.translateText('Special Characters'),
@@ -197,44 +196,17 @@ function insertMenu(options: EditorOptions, ui: EditorUI, commands: EditorComman
     { command: EditorCommandId.ParagraphInsert },
     { command: EditorCommandId.InsertDiv },
     { command: EditorCommandId.HorizontalRule },
-    // Parts structural commands
-    {
-      text: 'Parts',
-      subMenu: {
-        items: [
-          { command: EditorCommandId.PartIndent },
-          { command: EditorCommandId.PartOutdent },
-        ],
-      },
-    },
-    // Exam commands (if available)
-    ...(haveAnyOf(commands, EditorCommandId.ExamIndent, EditorCommandId.ExamOutdent, EditorCommandId.ExamNewBlock)
-      ? [
-        { separator: true },
-        {
-          text: 'Exam',
-          subMenu: {
-            items: [
-              { command: EditorCommandId.ExamIndent },
-              { command: EditorCommandId.ExamOutdent },
-              { command: EditorCommandId.ExamNewBlock },
-            ],
-          },
-        },
-      ]
-      : []),
     ...(haveAnyOf(commands, EditorCommandId.Tabset)
-      ? [
-        { separator: true },
-        { command: EditorCommandId.Tabset },
-        { command: EditorCommandId.Callout },
-      ] : []),
+     ? [
+      { separator: true },
+      { command: EditorCommandId.Tabset },
+      { command: EditorCommandId.Callout },
+     ] : []),
     { separator: true },
-    {
-      command: haveAnyOf(commands, EditorCommandId.UserComment)
-        ? EditorCommandId.UserComment
-        : EditorCommandId.HTMLComment
-    }
+    { command: haveAnyOf(commands, EditorCommandId.UserComment) 
+        ? EditorCommandId.UserComment 
+        : EditorCommandId.HTMLComment 
+    }      
   ];
 }
 
