@@ -4,15 +4,14 @@ format:
         css: [part.css]
 ---
 
-::: part
+::::: part
 content, right here.
 
 $$
 e=mc^2
 $$
-:::
 
-:::: {.part title="Good times"}
+:::: {.part title="Good times dude"}
 more content!
 
 dude..
@@ -21,6 +20,7 @@ dude..
 aha!
 :::
 ::::
+:::::
 
 ::: {.part title="Part"}
 This is pretty cool!

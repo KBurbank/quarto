@@ -8,7 +8,8 @@ import { EditorState, Transaction, Plugin, PluginKey, TextSelection } from 'pros
 import { DecorationSet, Decoration } from 'prosemirror-view';
 import { gapCursor } from 'prosemirror-gapcursor';
 import './part-styles.css';
-import { ProsemirrorCommand, EditorCommandId } from '../../api/command';
+import { ProsemirrorCommand } from '../../api/command';
+
 import { OmniInsertGroup } from '../../api/omni_insert';
 import { BaseKey } from '../../api/basekeys';
 import { PandocOutput, PandocToken, PandocTokenType } from '../../api/pandoc';
@@ -141,7 +142,7 @@ const extension = (_context: ExtensionContext): Extension => {
 
     commands: (schema: Schema) => {
       const insertPart = new ProsemirrorCommand(
-        EditorCommandId.PartInsert,
+        'PartInsert' as any,
         [],
         (state: EditorState, dispatch?: (tr: Transaction) => void) => {
           const typePart = (schema.nodes as any).part;
@@ -166,7 +167,7 @@ const extension = (_context: ExtensionContext): Extension => {
       );
 
       const indent = new ProsemirrorCommand(
-        EditorCommandId.PartIndent,
+        'PartIndent' as any,
         [],
         (state: EditorState, dispatch?: (tr: Transaction) => void) => {
           const depth = findPartDepth(state, schema);
@@ -207,7 +208,7 @@ const extension = (_context: ExtensionContext): Extension => {
       );
 
       const outdent = new ProsemirrorCommand(
-        EditorCommandId.PartOutdent,
+        'PartOutdent' as any,
         [],
         (state: EditorState, dispatch?: (tr: Transaction) => void) => {
           const depth = findPartDepth(state, schema);

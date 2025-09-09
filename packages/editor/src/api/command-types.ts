@@ -146,6 +146,13 @@ export enum EditorCommandId {
   InsertSlideColumns = 'AE62D05F-1415-4E1F-84AE-753EE2393002'
 }
 
+// Part commands (custom extension)
+export enum EditorCommandIdPart {
+  PartInsert = 'F1D2C3B4-A5B6-47C8-99AA-112233445566',
+  PartIndent = '5D3B8D9A-2E44-45A1-9B0A-1C2F0E7C9A11',
+  PartOutdent = 'A9E3F2C0-7B1D-4F6A-8E20-3D5C7A1B4E22',
+}
+
 export interface EditorCommand {
   readonly id: EditorCommandId;
   readonly keymap: readonly string[];
