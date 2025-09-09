@@ -37,7 +37,7 @@ import { kPlatformMac } from './platform';
 
 import { BaseKey, BaseKeyBinding } from './basekeys-types';
 
-export { BaseKey} ;
+export { BaseKey };
 export type { BaseKeyBinding }
 
 
@@ -215,15 +215,18 @@ function clearBlockFormatting() {
         state.schema.nodes.ordered_list,
         state.schema.nodes.bullet_list,
         state.schema.nodes.div,
-        state.schema.nodes.line_block
+        state.schema.nodes.line_block,
+        // allow clearing empty containers
+        (state.schema.nodes as any).part,
+        (state.schema.nodes as any).solution,
       ].filter(x => !!x);
       const parentNode = findParentNodeOfType(nodeTypes)(state.selection);
       if (parentNode && parentNode.node.textContent.length === 0) {
         if (dispatch) {
           const tr = state.tr;
           tr.replaceRangeWith(
-            parentNode.pos, 
-            parentNode.pos + parentNode.node.nodeSize, 
+            parentNode.pos,
+            parentNode.pos + parentNode.node.nodeSize,
             state.schema.nodes.paragraph.create()
           );
           setTextSelection(parentNode.pos)(tr);
@@ -232,6 +235,6 @@ function clearBlockFormatting() {
         return true;
       }
     }
-    return false;    
+    return false;
   };
 }

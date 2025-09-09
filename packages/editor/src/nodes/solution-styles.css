@@ -1,0 +1,15 @@
+.solution {
+  border: 1px solid var(--pm-block-border-color, #d0d0d0);
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.solution-header {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.solution-header .solution-label::before { content: "Solution:"; }
+
+.solution-content { margin-left: 0.5rem; }

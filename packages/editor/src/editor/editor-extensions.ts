@@ -110,6 +110,7 @@ import nodeUserComment from '../nodes/user_comment/user_comment';
 import nodeShortcodeBlock from '../nodes/shortcode_block';
 import nodeHtmlPreserve from '../nodes/html_preserve';
 import nodePart from '../nodes/part/part';
+import nodeSolution from '../nodes/solution';
 
 // extension/plugin factories
 import { aceExtension } from '../optional/ace/ace';
@@ -172,6 +173,7 @@ export function initExtensions(
     // nodes
     nodeDiv,
     nodePart,
+    nodeSolution,
     nodeFootnote,
     nodeYamlMetadata,
     nodeRmdCodeChunk,

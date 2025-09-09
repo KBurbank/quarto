@@ -49,12 +49,15 @@ export function canInsertRmdChunk(state: EditorState) {
   if (within(schema.nodes.table)) {
     return false;
   }
-  if (
-    !selectionIsBodyTopLevel(state.selection) &&
-    !within(schema.nodes.list_item) &&
-    !within(schema.nodes.blockquote) &&
-    schema.nodes.div && !within(schema.nodes.div)
-  ) {
+  const allowed =
+    selectionIsBodyTopLevel(state.selection) ||
+    within(schema.nodes.list_item) ||
+    within(schema.nodes.blockquote) ||
+    (schema.nodes.div && within(schema.nodes.div)) ||
+    (schema.nodes.part && within(schema.nodes.part)) ||
+    (schema.nodes.solution && within(schema.nodes.solution));
+
+  if (!allowed) {
     return false;
   }
 
@@ -90,7 +93,7 @@ export function insertRmdChunk(chunkPlaceholder: string) {
       } else {
         const emptyNode = findParentNode(node => node.type === state.schema.nodes.paragraph && node.childCount === 0)(tr.selection);
         if (emptyNode && selectionWithinLastBodyParagraph(tr.selection)) {
-          tr.insert(tr.selection.from-1, rmdNode);
+          tr.insert(tr.selection.from - 1, rmdNode);
         } else {
           tr.replaceSelectionWith(rmdNode);
         }
@@ -155,7 +158,7 @@ export function rmdChunk(code: string): EditorRmdChunk | null {
 
     const isContainerChunk = ["verbatim", "asis", "comment"].includes(lang);
 
-    // for container chunks, delimiter is one backtick greater than the most 
+    // for container chunks, delimiter is one backtick greater than the most
     // ticks we've found starting a line (otherwise is ```)
     const delimiter = isContainerChunk ? lines.reduce((ticks: string, line: string) => {
       const match = line.match(/^```+/);
@@ -167,7 +170,7 @@ export function rmdChunk(code: string): EditorRmdChunk | null {
 
     // filter out stray ``` if this isn't a container chunk
     if (!isContainerChunk) {
-       // remove lines, other than the first, which are chunk delimiters (start
+      // remove lines, other than the first, which are chunk delimiters (start
       // with ```). these are generally unintended but can be accidentally
       // introduced by e.g., pasting a chunk with its delimiters into visual mode,
       // where delimiters are implicit. if these lines aren't removed, they create
@@ -180,7 +183,7 @@ export function rmdChunk(code: string): EditorRmdChunk | null {
         return !line.startsWith("```");
       });
     }
-   
+
 
     // a completely empty chunk (no second line) should be returned
     // as such. if it's not completely empty then append a newline
@@ -214,7 +217,7 @@ export function mergeRmdChunks(chunks: EditorRmdChunk[]) {
 
 /**
  * Attempts to extract the engine name and label from a chunk header.
- * 
+ *
  * @param text The chunk header, e.g. {r foo}
  * @returns An object with `engine` and `label` properties, or null.
  */
@@ -222,13 +225,13 @@ export function rmdChunkEngineAndLabel(text: string) {
 
   // Match the engine and (maybe the) label with a regex
   const match = text.match(/^\{([a-zA-Z0-9_-]+)[\s,]*([a-zA-Z0-9/._='"-]*)/);
-  
+
   if (match) {
     // The first capturing group is the engine
     const engine = match[1];
 
     // The second capturing group in the regex matches the first string after
-    // the engine. This might be: 
+    // the engine. This might be:
     // - a label (e.g., {r label})
     // - a chunk option (e.g., {r echo=FALSE}). If it has an =, presume that it's an option.
     // - empty
@@ -240,10 +243,10 @@ export function rmdChunkEngineAndLabel(text: string) {
     }
 
     // Finally, look for label in #| comments
-    // 
+    //
     // ```{r}
     // #| label: label
-    // 
+    //
     for (const line of text.split("\n")) {
       const labelMatch = line.match(/^#\|\s*label:\s+(.*)$/);
       if (labelMatch) {

@@ -66,7 +66,7 @@ const extension = (_context: ExtensionContext): Extension => {
             ...pandocAttrSpec,
             title: { default: '' },
           },
-          content: 'block+',
+          content: '(solution | block)+',
           group: 'block',
           isolating: true,
           defining: true,
