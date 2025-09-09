@@ -1,0 +1,59 @@
+/* Minimal styling */
+.part {
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+  }
+  
+  /* Slightly lighter border for nested parts */
+  .part .part { border-color: #c7c7c7; }
+  
+  /* Indentation by nesting level */
+  .part { margin-left: 0; }
+  .part .part { margin-left: 0.75rem; }
+  .part .part .part { margin-left: 1.25rem; }
+  .part .part .part .part { margin-left: 1.75rem; }
+  
+  /* Numbering via CSS counters (no attribute changes needed) */
+  :root { counter-reset: question; }
+  
+  /* Level 1: Question N */
+  .part { counter-increment: question; counter-reset: part subpart subsubpart; }
+  .part::before {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    content: "Question " counter(question);
+  }
+  
+  /* Level 2: Part a, b, ... */
+  .part .part { counter-increment: part; counter-reset: subpart subsubpart; }
+  .part .part::before {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    content: "Part " counter(part, lower-alpha);
+  }
+  
+  /* Level 3: Subpart i, ii, ... */
+  .part .part .part { counter-increment: subpart; counter-reset: subsubpart; }
+  .part .part .part::before {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    content: "Subpart " counter(subpart, lower-roman);
+  }
+  
+  /* Level 4: Subsubpart i, ii, ... */
+  .part .part .part .part { counter-increment: subsubpart; }
+  .part .part .part .part::before {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    content: "Subsubpart " counter(subsubpart, lower-roman);
+  }/******************************************
+ *  Author : Author
+ *  Created On : 9/8/2025
+ *  File : part.css
+ ******************************************/

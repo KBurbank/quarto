@@ -1,0 +1,34 @@
+.part {
+  border: 1px solid var(--pm-block-border-color, #d0d0d0);
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.part .part {
+  border-color: var(--pm-block-border-color, #c7c7c7);
+}
+
+.part-header {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.part-header .part-title { font-weight: 600; }
+
+.part-content { margin-left: 0.5rem; }
+
+/* Dynamic headers by structural level with counters */
+:root { counter-reset: question; }
+
+/* Counters on containers */
+.part[data-struct-level="1"] { counter-increment: question; counter-reset: part subpart subsubpart; }
+.part[data-struct-level="2"] { counter-increment: part; counter-reset: subpart subsubpart; }
+.part[data-struct-level="3"] { counter-increment: subpart; counter-reset: subsubpart; }
+.part[data-struct-level="4"] { counter-increment: subsubpart; }
+
+/* Labels placed before title text */
+.part[data-struct-level="1"] > .part-header .part-label::before { content: "Question " counter(question) ": "; }
+.part[data-struct-level="2"] > .part-header .part-label::before { content: "Part " counter(part, lower-alpha) ": "; }
+.part[data-struct-level="3"] > .part-header .part-label::before { content: "Subpart " counter(subpart, lower-roman) ": "; }
+.part[data-struct-level="4"] > .part-header .part-label::before { content: "Subsubpart " counter(subsubpart, lower-roman) ": "; }

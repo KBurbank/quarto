@@ -58,7 +58,6 @@ import markCode from '../marks/code';
 import markLink from '../marks/link/link';
 import behaviorHistory from '../behaviors/history';
 import behaviorSelectAll from '../behaviors/select_all';
-import behaviorCursor from '../behaviors/cursor';
 import behaviorFind from '../behaviors/find';
 import behaviorSpellingInteractive from '../behaviors/spelling/spelling-interactive';
 import behaviorClearFormatting from '../behaviors/clear_formatting';
@@ -110,7 +109,7 @@ import nodeDefinitionList from '../nodes/definition_list/definition_list';
 import nodeUserComment from '../nodes/user_comment/user_comment';
 import nodeShortcodeBlock from '../nodes/shortcode_block';
 import nodeHtmlPreserve from '../nodes/html_preserve';
-import nodeExam from '../nodes/exam/exam';
+import nodePart from '../nodes/part/part';
 
 // extension/plugin factories
 import { aceExtension } from '../optional/ace/ace';
@@ -146,7 +145,6 @@ export function initExtensions(
     markLink,
     behaviorHistory,
     behaviorSelectAll,
-    behaviorCursor,
     behaviorFind,
     behaviorSpellingInteractive,
     behaviorClearFormatting,
@@ -172,8 +170,8 @@ export function initExtensions(
     behaviorRemoveSection,
 
     // nodes
-    nodeExam,
     nodeDiv,
+    nodePart,
     nodeFootnote,
     nodeYamlMetadata,
     nodeRmdCodeChunk,

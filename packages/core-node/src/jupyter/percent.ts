@@ -21,7 +21,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 import { Metadata, asYamlText, lines, metadataFromKeyvalueText, trimEmptyLines } from "core";
-import { kApplicationJavascript, kApplicationRtf, kRestructuredText, kTextHtml, kTextLatex } from "../mime.js";
+import { kApplicationJavascript, kApplicationRtf, kRestructuredText, kTextHtml, kTextLatex } from "../mime";
 
 const kCellRawMimeType = "raw_mimetype";
 
@@ -47,7 +47,7 @@ export function markdownFromJupyterPercentScript(file: string, contents: string,
   const language = ext === ".jl" ? "julia" : ext === ".r" ? "r" : "python";
 
   // break into cells
-  contents = contents || fs.readFileSync(file, { encoding: "utf-8"});
+  contents = contents || fs.readFileSync(file, { encoding: "utf-8" });
   const cells: PercentCell[] = [];
   const activeCell = () => cells[cells.length - 1];
   for (const line of lines(contents.trim())) {
@@ -211,5 +211,3 @@ function mdEnclosedOutput(begin: string, text: string[], end: string) {
   ];
   return md.join("");
 }
-
-

@@ -44,11 +44,12 @@ import { insertCalloutCommand, editCalloutDiv } from './div-callout';
 import { insertTabsetCommand } from './div-tabset';
 
 import './div-styles.css';
+import '../exam/exam-styles.css';
 
 const DIV_ATTR = 0;
 const DIV_CHILDREN = 1;
 
-const extension = (context: ExtensionContext) : Extension | null => {
+const extension = (context: ExtensionContext): Extension | null => {
   const { pandocExtensions, format, ui } = context;
 
   if (!pandocExtensions.fenced_divs && !pandocExtensions.native_divs) {
@@ -79,14 +80,50 @@ const extension = (context: ExtensionContext) : Extension | null => {
             },
           ],
           toDOM(node: ProsemirrorNode): DOMOutputSpec {
-            const attr = {
+            const classes: string[] = (node.attrs.classes || []) as string[];
+            const baseAttr = {
               'data-div': '1',
               ...pandocAttrToDomAttr({
                 ...node.attrs,
-                classes: [...node.attrs.classes, 'pm-div', 'pm-div-background-color'],
+                classes: [...classes, 'pm-div', 'pm-div-background-color'],
               }),
+            } as { [key: string]: string };
+
+            const getTitle = (fallback: string) => {
+              const kv = (node.attrs.keyvalue || []) as [string, string][];
+              const title = kv.find(([k]) => k === 'title')?.[1];
+              return title || fallback;
             };
-            return ['div', attr, 0];
+
+            if (classes.includes('part')) {
+              const title = getTitle('Part');
+              return [
+                'div',
+                { ...baseAttr, 'data-title': title },
+                ['div', { class: 'part-header' }, title],
+                ['div', { class: 'part-content' }, 0],
+              ];
+            }
+            if (classes.includes('question')) {
+              const title = getTitle('Question');
+              return [
+                'div',
+                { ...baseAttr, 'data-title': title },
+                ['div', { class: 'question-header' }, title],
+                ['div', { class: 'question-content' }, 0],
+              ];
+            }
+            if (classes.includes('subpart')) {
+              const title = getTitle('Subpart');
+              return [
+                'div',
+                { ...baseAttr, 'data-title': title },
+                ['div', { class: 'subpart-header' }, title],
+                ['div', { class: 'subpart-content' }, 0],
+              ];
+            }
+
+            return ['div', baseAttr, 0];
           },
         },
 
@@ -164,9 +201,9 @@ const extension = (context: ExtensionContext) : Extension | null => {
               return undefined;
             }
             const divNode = findParentNodeOfType(schema.nodes.div)(newState.selection);
-            if (divNode && 
-                (newState.selection.anchor === divNode.start + 1) &&
-                 newState.selection.head === divNode.pos + divNode.node.nodeSize - 2) {
+            if (divNode &&
+              (newState.selection.anchor === divNode.start + 1) &&
+              newState.selection.head === divNode.pos + divNode.node.nodeSize - 2) {
               const tr = newState.tr;
               const sel = TextSelection.create(tr.doc, divNode.start, divNode.start + divNode.node.nodeSize - 1);
               tr.setSelection(sel);

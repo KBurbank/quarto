@@ -143,7 +143,17 @@ export enum EditorCommandId {
   // slides
   InsertSlidePause = 'FCA8BF2E-2668-4919-92FC-02083EB48246',
   InsertSlideNotes = '9C709915-02BE-4F4F-9CEB-50E17973C9BE',
-  InsertSlideColumns = 'AE62D05F-1415-4E1F-84AE-753EE2393002'
+  InsertSlideColumns = 'AE62D05F-1415-4E1F-84AE-753EE2393002',
+
+  // exam
+  ExamIndent = '6F6A742C-2D4B-4F7D-9B39-27C6F2E2B5D1',
+  ExamOutdent = 'B9C6A5D2-7A51-4E9C-8B2C-0A1E3F47C8D2',
+  ExamNewBlock = '0E3C2A1B-5D6F-47C8-9B2C-A1E3F47C8D2B',
+
+  // part
+  PartInsert = 'F1D2C3B4-A5B6-47C8-99AA-112233445566',
+  PartIndent = '5D3B8D9A-2E44-45A1-9B0A-1C2F0E7C9A11',
+  PartOutdent = 'A9E3F2C0-7B1D-4F6A-8E20-3D5C7A1B4E22'
 }
 
 export interface EditorCommand {

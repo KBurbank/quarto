@@ -1,21 +1,89 @@
-.part-header {
+.exam-header { font-weight: 600; margin-bottom: 0.25rem; }
+.exam-content { margin-left: 0.5rem; }
+
+.subsubpart-header {
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
-.part-content {
+.subsubpart-content {
   margin-left: 0.5rem;
 }
-.question-header {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+
+/* Visual boundaries and handles to clarify block edges */
+.pm-div.exam[data-level="2"], .exam[data-level="2"] {
+  border: 1px solid var(--pm-block-border-color, #d0d0d0);
+  border-radius: 6px;
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+  margin: 0.5rem 0;
 }
-.question-content {
-  margin-left: 0.5rem;
+
+.pm-div.exam[data-level="1"], .exam[data-level="1"] {
+  border: 1px dashed var(--pm-block-border-color, #c0c0c0);
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
 }
-.subpart-header {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+
+.pm-div.exam[data-level="3"], .exam[data-level="3"] {
+  border: 1px dotted var(--pm-block-border-color, #b0b0b0);
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
 }
-.subpart-content {
-  margin-left: 0.5rem;
+
+.pm-div.exam[data-level="4"], .exam[data-level="4"] {
+  border: 1px dotted var(--pm-block-border-color, #aaa);
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+/* Visual indentation to reflect outline level */
+.exam[data-level="1"] { margin-left: 0; }
+.exam[data-level="2"] { margin-left: 1.25rem; }
+.exam[data-level="3"] { margin-left: 2.0rem; }
+.exam[data-level="4"] { margin-left: 3.0rem; }
+
+/* Indent nested exam blocks by nesting depth (structure-based) */
+.exam .exam { margin-left: 1.25rem; }
+.exam .exam .exam { margin-left: 2.0rem; }
+.exam .exam .exam .exam { margin-left: 3.0rem; }
+
+.pm-div.subsubpart, .subsubpart {
+  border: 1px dotted var(--pm-block-border-color, #aaa);
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+/* Invalid hierarchy highlight */
+.exam-invalid > .exam-header {
+  color: #b00020;
+}
+
+/* Insert affordances before/after content to indicate edges */
+.exam::before {
+  content: attr(data-title, '') attr(data-title) '';
+  display: block;
+  font-size: 0.75rem;
+  color: #777;
+}
+.exam::after {
+  content: 'end';
+  display: block;
+  font-size: 0.75rem;
+  color: #777;
+  text-align: right;
+}
+
+/* Show structure level for Part nodes via decoration attribute */
+.part[data-struct-level]::before {
+  content: 'Level ' attr(data-struct-level);
+  display: inline-block;
+  font-size: 0.7rem;
+  color: #666;
+  background: #f0f0f0;
+  border-radius: 4px;
+  padding: 0 4px;
+  margin-right: 6px;
 }
