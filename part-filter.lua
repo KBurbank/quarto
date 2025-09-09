@@ -36,18 +36,26 @@ local function transform_blocks(blocks, current_depth)
     if is_part_div(b) then
       local new_depth = current_depth + 1
       local title = b.attributes and b.attributes.title
+      local points = nil
+      if b.attributes then
+        points = b.attributes.points or b.attributes.point or b.attributes.pts or b.attributes.p
+      end
+      local bracket = ''
+      if points and points ~= '' then
+        bracket = '[' .. points .. ']'
+      end
       local cmdline
       if new_depth == 1 then
         if title and title ~= '' then
-          cmdline = '\\titledquestion{' .. title .. '}'
+          cmdline = '\\titledquestion' .. bracket .. '{' .. title .. '}'
         else
-          cmdline = '\\question'
+          cmdline = '\\question' .. bracket
         end
       else
         if title and title ~= '' then
-          cmdline = '\\part ' .. title
+          cmdline = '\\part' .. bracket .. ' ' .. title
         else
-          cmdline = command_for_depth(new_depth)
+          cmdline = command_for_depth(new_depth) .. bracket
         end
       end
       output:insert(pandoc.RawBlock('tex', cmdline))

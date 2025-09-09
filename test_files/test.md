@@ -13,7 +13,7 @@ labels:
 toc-title: Table of contents
 ---
 
-\question
+\titledquestion[5]{An initial question}
 
 content, right here.
 
@@ -22,7 +22,7 @@ e=mc^2
 $$
 
 \begin{parts}
-\part Good times dude
+\part[10] Good times dude
 
 more content!
 

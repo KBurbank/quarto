@@ -11,14 +11,14 @@ format:
       filters: ["../part-filter.lua"]
 ---
 
-::::: part
+::::: {.part points=5 title="An initial question"}
 content, right here.
 
 $$
 e=mc^2
 $$
 
-:::: {.part title="Good times dude"}
+:::: {.part points=10 title="Good times dude"}
 more content!
 
 dude..
