@@ -25,8 +25,8 @@ import { Document } from "../../document";
 import { isExecutableLanguageBlock, languageNameFromBlock } from "../language";
 
 
-export function pandocParser(context: QuartoContext, resourcesDir: string): Parser {
-
+export function pandocParser(context: QuartoContext, resourcesDir: string) : Parser {
+    
   return cachingParser((doc: Document) => {
     const tokens = parseDocument(context, resourcesDir, doc.getText());
 
@@ -34,61 +34,51 @@ export function pandocParser(context: QuartoContext, resourcesDir: string): Pars
   })
 }
 
-function parseDocument(context: QuartoContext, resourcePath: string, markdown: string): Token[] {
-
-  // remove the yaml front matter by replacing it with blank lines
+function parseDocument(context: QuartoContext, resourcePath: string, markdown: string) : Token[] {
+ 
+  // remove the yaml front matter by replacing it with blank lines 
   // (if its invalid it will prevent parsing of the document)
   const partitioned = partitionYamlFrontMatter(markdown);
   const yaml = partitioned ? partitioned.yaml : null;
-  const input = partitioned
-    ? "\n".repeat(lines(partitioned.yaml).length - 1) + partitioned.markdown
+  const input = partitioned 
+    ? "\n".repeat(lines(partitioned.yaml).length-1) +  partitioned.markdown
     : markdown;
 
   try {
-    // simple regex rewrite: selected environments -> fenced divs
-    const envs = ["parts", "subparts", "solution"];
-    const envAlt = envs.map(e => e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-    const beginRe = new RegExp(`\\\\begin\\{(${envAlt})\\}`, 'g');
-    const endRe = new RegExp(`\\\\end\\{(${envAlt})\\}`, 'g');
-    const inputRewritten = input
-      .replace(beginRe, (_m, name) => `::: .${name}`)
-      .replace(endRe, ':::');
-
     const output = context.runPandoc(
-      { input: inputRewritten },
+      { input },
       "--from", "commonmark_x+sourcepos",
-      "--to", "plain",
-      "--lua-filter", path.join(resourcePath, 'parser.lua'),
-      "--lua-filter", path.join(resourcePath, 'wrap-examclass-terms.lua')
+       "--to", "plain",
+       "--lua-filter", path.join(resourcePath, 'parser.lua')
     );
-
+  
     // parse json (w/ some fixups)
     const inputLines = lines(input);
-    const outputJson = JSON.parse(output) as Record<string, Token>;
-    const tokens = (Object.values(outputJson).map((token): Token => {
-
+    const outputJson = JSON.parse(output) as Record<string,Token>;
+    const tokens = (Object.values(outputJson).map((token) : Token => {
+  
       // trim blocks
-      if ((token.range.end.line > token.range.start.line) &&
-        token.range.end.character === 0) {
+      if ((token.range.end.line > token.range.start.line) && 
+          token.range.end.character === 0) {
         token.range = makeRange(
           token.range.start.line,
           token.range.start.character,
           token.range.end.line - 1,
-          inputLines[token.range.end.line - 1].length
+          inputLines[token.range.end.line -1].length
         )
       }
-
+      
       // fixup lang
       if (isCodeBlock(token) && isExecutableLanguageBlock(token)) {
         const lang = languageNameFromBlock(token);
         token.attr![kAttrClasses][0] = `{${lang}}`;
-      }
+      } 
 
       // add null if no data
       if (token.data === undefined) {
         token.data = null;
       }
-
+      
       // return token (order fields)
       return {
         type: token.type,
@@ -97,8 +87,8 @@ function parseDocument(context: QuartoContext, resourcePath: string, markdown: s
         data: token.data
       };
     }));
-
-
+  
+  
     // add a FrontMatter token if there is front matter
     if (yaml) {
       const yamlLines = lines(yaml);
@@ -106,16 +96,18 @@ function parseDocument(context: QuartoContext, resourcePath: string, markdown: s
         type: "FrontMatter",
         range: makeRange(0, 0, yamlLines.length, 0),
         attr: undefined,
-        data: yaml,
+        data: yaml, 
       }
       tokens.unshift(yamlToken);
     }
-
+  
     return tokens;
 
-  } catch (error) {
+  } catch(error) {
     // message has already been written to stderr
     return [];
-
+  
   }
 }
+
+
