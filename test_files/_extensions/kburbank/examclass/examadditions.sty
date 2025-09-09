@@ -1,0 +1,139 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{examadditions}[2023/05/24 Additional features for the exam class]
+\RequirePackage{environ}
+\RequirePackage{ifthen}
+
+
+
+% ---------- Conditional Question Title ---------- %
+
+\makeatletter
+\newif\ifIsTitledQuestion
+\def\ifIsTitledQuestion{%
+  \ifnum\pdfstrcmp{\thequestiontitle}{\thequestion}=0 %
+    \expandafter\@secondoftwo
+  \else
+    \expandafter\@firstoftwo
+  \fi
+  {\IsTitledQuestiontrue}%
+  {\IsTitledQuestionfalse}%
+  \ifIsTitledQuestion
+}
+\makeatother
+
+\makeatletter
+\newcommand{\conditionalQuestionTitle}{%
+  \ifIsTitledQuestion
+    \thequestiontitle
+  \else
+    \@empty
+  \fi
+}
+\makeatother
+
+% ---------- Multicol Checkboxes Environment ---------- %
+\RequirePackage{multicol}
+
+\newenvironment{multicolcheckboxes}{%
+\begin{checkboxes}\begin{multicols}{2}%
+}{%
+\end{multicols}\end{checkboxes}%
+}
+
+% ---------- True/False Environment ---------- %
+
+
+\newenvironment{true_false_questions}[1][]{%
+    \vspace{0.5em}
+    \begin{tabular}[t]{p{0.7\textwidth}cc}
+    \textbf{#1} & \textbf{True} & \textbf{False} \\
+    \hline
+    \noalign{\vspace{2pt}}
+}{%
+    \end{tabular}
+}
+
+\newcommand{\tfitem}[2]{%
+    #1 & \TrueFalseChoice{#2} & \TrueFalseChoice{\ifstrequal{#2}{T}{F}{T}} \\[2pt]
+}
+
+\makeatletter
+\newcommand*{\TrueFalseChoice}[1]{%
+    \ifprintanswers
+        \ifthenelse{\equal{#1}{T}}{%
+        {\color@begingroup\CorrectChoice@Emphasis\checked@char
+        \color@endgroup}%
+        }{%
+        \checkbox@char
+        }%
+    \else
+    \checkbox@char
+    \fi
+}
+\makeatother
+
+% ---------- opt_notprintanswers Environment ---------- %
+
+% The opt_notprintanswers environment is used to print content that should only be printed if printanswers is false. It can be used to print instructions for the students, for example.
+
+\NewEnviron{opt_notprintanswers}{
+  \ifprintanswers
+  \else
+    \BODY
+  \fi
+}
+
+
+% ---------- Instructions Environment ---------- %
+
+% The instructions environment is just a shortcut for the opt_notprintanswers environment.
+
+\NewEnviron{instructions}{
+  \ifprintanswers
+  \else
+    \BODY
+  \fi
+}
+
+% ---------- opt_printanswers Environment ---------- %
+
+% The opt_printanswers environment is used to print content that should only be printed if printanswers is true. It can be used to print the correct answers to the questions, for example.
+
+\NewEnviron{opt_printanswers}{
+  \ifprintanswers
+    \BODY
+  \fi
+}
+
+
+
+
+
+% ---------- Solutions Title ---------- %
+% Macro to change the title of the document to the original title with "Solutions" appended
+
+\newcommand{\solutionstitle}{%
+  \let\oldtitle\title
+  \renewcommand{\title}[1]{%
+    \oldtitle{##1 Solutions}%
+  }%
+}
+
+\newcommand{\nameboxtitle}{%
+  \let\oldtitle\title % Save the original \\title command
+  \renewcommand{\title}[1]{% % Redefine \\title
+    % Prepare the formatted title content
+    \def\formattedtitle{%
+      \hfill\normalsize Name: \underline{\hspace{6cm}}\\% Right-justify Name line
+      \par\vspace{3ex}\par% Add vertical space and ensure new paragraph
+      \begin{center}% Center the title
+        {\LARGE ##1}% Apply \LARGE only to the original title
+      \end{center}% 
+    }%
+    % Call the original \\title command with the formatted content
+    \expandafter\oldtitle\expandafter{\formattedtitle}%
+  }%
+}
+
+
+\endinput

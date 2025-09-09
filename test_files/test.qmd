@@ -2,6 +2,13 @@
 format:
     html:
         css: [part.css]
+    examclass-pdf:
+        filters: ["../part-filter.lua"]
+        keep-tex: true
+    md:
+      pandoc:
+        to: markdown+raw_tex
+      filters: ["../part-filter.lua"]
 ---
 
 ::::: part
@@ -30,5 +37,5 @@ Some more content
 
 ```{r}
 7+8
-  
+
 ```

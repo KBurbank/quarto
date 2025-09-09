@@ -1,0 +1,54 @@
+title: Examclass
+author: Kendra Burbank
+version: 0.9.4
+quarto-required: ">=1.4.0"
+contributes:
+  filters:
+    - add_questions_environment.lua
+    - wrapExamClassTerms.lua
+    - latexComments.lua
+  formats:
+    common:
+      format-resources:
+        - examadditions.sty
+      filters:
+        - wrapExamClassTerms.lua
+        - add_questions_environment.lua
+        - latexComments.lua
+      keep_tex: true
+      documentclass: exam
+      geometry: top=.6in, left=.6in, right=.6in, bottom=1in
+      fontsize: 12pt
+      header-includes:
+        - \usepackage{colortbl}
+        - \usepackage{lastpage}
+        - \usepackage{examadditions}
+      include-in-header:
+        - text: |
+            \checkboxchar{$\Box$}
+            \checkedchar{$\blacksquare$}
+            \addpoints
+            \qformat{%
+            \textbf{\thequestion.}%
+            \textit{ \conditionalQuestionTitle}\hfill (\totalpoints\ points in total)
+            }
+            % Set the page style to have a header and footer.
+            \pagestyle{headandfoot}
+            \footer{}{Page \thepage\ of \pageref*{LastPage}}{}
+    pdf: 
+      header-includes:
+        - \nameboxtitle
+    pdf+solutions:
+      keep-md: true
+      header-includes:
+        - \solutionstitle
+      classoption: answers
+      # (other formats)
+
+knitr:
+  opts_chunk:
+    fig.width: 4
+    fig.height: 3
+    message: false
+    warning: false
+    collapse: true
