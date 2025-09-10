@@ -546,6 +546,28 @@ const extension = (_context: ExtensionContext): Extension => {
             },
           },
         }),
+        // While a Part node itself is selected, limit typing and handle Enter to exit
+        new Plugin({
+          props: {
+            handleKeyDown(view, event) {
+              const sel = view.state.selection;
+              if (!(sel instanceof NodeSelection) || !isPart(sel.node, schema)) return false;
+              // Allow Backspace (delete the node), Tab/Shift-Tab (indent/outdent via baseKeys)
+              if (event.key === 'Backspace') return false;
+              if (event.key === 'Tab') return false; // includes Shift-Tab via event.shiftKey
+              if (event.key === 'Enter') {
+                const pos = sel.from;
+                const node = sel.node;
+                const insideEnd = pos + node.nodeSize - 1;
+                const tr = view.state.tr.setSelection(TextSelection.create(view.state.doc, insideEnd)).scrollIntoView();
+                view.dispatch(tr);
+                return true;
+              }
+              event.preventDefault();
+              return true;
+            },
+          },
+        }),
 
         // Auto-insert a paragraph when clicking at a gap position inside a Part
         new Plugin({
