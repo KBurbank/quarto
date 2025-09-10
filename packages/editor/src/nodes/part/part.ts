@@ -423,7 +423,7 @@ const extension = (_context: ExtensionContext): Extension => {
           });
 
           // When the node is selected, move caret to the end of content on any key press
-          header.addEventListener('keydown', (e: KeyboardEvent) => {
+          header.addEventListener('keydown', () => {
             const sel = this.view.state.selection;
             if (!(sel instanceof NodeSelection)) return;
             const pos = this.getPos();

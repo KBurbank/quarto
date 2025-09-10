@@ -254,7 +254,7 @@ const extension = (_context: ExtensionContext): Extension => {
             this.view.dispatch(tr);
           });
 
-          header.addEventListener('keydown', (e: KeyboardEvent) => {
+          header.addEventListener('keydown', () => {
             const sel = this.view.state.selection;
             if (!(sel instanceof NodeSelection)) return;
             const pos = this.getPos();
