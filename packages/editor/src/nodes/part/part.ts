@@ -413,6 +413,7 @@ const extension = (_context: ExtensionContext): Extension => {
           header.addEventListener('mousedown', (e) => {
             const el = e.target as HTMLElement | null;
             if (el && (el === titleInput || el === pointsInput || (el.closest && el.closest('input')))) return;
+            e.preventDefault();
             const pos = this.getPos();
             if (typeof pos !== 'number') return;
             const tr = this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos));
@@ -492,6 +493,7 @@ const extension = (_context: ExtensionContext): Extension => {
             },
           },
         }),
+        
         // Auto-insert a paragraph when clicking at a gap position inside a Part
         new Plugin({
           props: {
