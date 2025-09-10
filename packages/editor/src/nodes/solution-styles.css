@@ -52,5 +52,7 @@
 
 /* When the Solution node is selected, suppress native text selection paint */
 .ProseMirror-selectednode.solution * { user-select: none; }
+.ProseMirror-selectednode.solution::selection { background: transparent; color: inherit; }
+.ProseMirror-selectednode.solution::-moz-selection { background: transparent; color: inherit; }
 .ProseMirror-selectednode.solution *::selection { background: transparent; color: inherit; }
 .ProseMirror-selectednode.solution *::-moz-selection { background: transparent; color: inherit; }

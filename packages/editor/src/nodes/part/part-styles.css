@@ -59,6 +59,8 @@
 
 /* When the Part node is selected, suppress native text selection paint */
 .ProseMirror-selectednode.part * { user-select: none; }
+.ProseMirror-selectednode.part::selection { background: transparent; color: inherit; }
+.ProseMirror-selectednode.part::-moz-selection { background: transparent; color: inherit; }
 .ProseMirror-selectednode.part *::selection { background: transparent; color: inherit; }
 .ProseMirror-selectednode.part *::-moz-selection { background: transparent; color: inherit; }
 
