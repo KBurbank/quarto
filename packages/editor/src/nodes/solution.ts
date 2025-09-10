@@ -4,7 +4,8 @@
 
 import { Node as ProsemirrorNode, DOMOutputSpec, Schema } from 'prosemirror-model';
 import { Extension, ExtensionContext } from '../api/extension';
-import { EditorState, Transaction, TextSelection } from 'prosemirror-state';
+import { EditorState, Transaction, TextSelection, Plugin } from 'prosemirror-state';
+import { DecorationSet, EditorView, NodeView, NodeSelection } from 'prosemirror-view';
 import { ProsemirrorCommand } from '../api/command';
 import { OmniInsertGroup } from '../api/omni_insert';
 import { PandocOutput, PandocToken, PandocTokenType } from '../api/pandoc';
@@ -48,6 +49,7 @@ const extension = (_context: ExtensionContext): Extension => {
         spec: {
           attrs: {
             ...pandocAttrSpec,
+            spacing: { default: '' },
           },
           group: 'block',
           content: 'block*',
@@ -60,7 +62,7 @@ const extension = (_context: ExtensionContext): Extension => {
               getAttrs(dom: Node | string) {
                 const el = dom as Element;
                 const base = pandocAttrParseDom(el, { class: 'solution' }, true);
-                return { ...base };
+                return { ...base, spacing: el.getAttribute('data-spacing') || '' };
               },
             },
           ],
@@ -71,7 +73,12 @@ const extension = (_context: ExtensionContext): Extension => {
                 'solution',
               ]
             });
-            return ['div', domAttr as any, solutionHeader(), ['div', { class: 'solution-content' }, 0]];
+            const headerSpacing = ((node.attrs as any).spacing as string) || '';
+            (domAttr as any)['data-spacing'] = headerSpacing;
+            return ['div', domAttr as any,
+              ['div', { class: 'solution-header' }, ['span', { class: 'solution-label' }], ['span', { class: 'solution-spacing' }, headerSpacing]],
+              ['div', { class: 'solution-content' }, 0]
+            ];
           },
         },
         pandoc: {
@@ -89,7 +96,8 @@ const extension = (_context: ExtensionContext): Extension => {
               block: 'solution',
               getAttrs: (tok: PandocToken) => {
                 const attr = pandocAttrReadAST(tok, 0);
-                return { ...attr } as { [key: string]: unknown };
+                const spacing = (attr.keyvalue || []).find(([k]: [string, string]) => k === 'spacing')?.[1] || '';
+                return { ...attr, spacing } as { [key: string]: unknown };
               },
               getChildren: (tok: PandocToken) => {
                 const children = (tok.c[1] as PandocToken[]) || [];
@@ -104,7 +112,11 @@ const extension = (_context: ExtensionContext): Extension => {
             output.writeToken(PandocTokenType.Div, () => {
               const existingClasses = ((node.attrs as any).classes || []) as string[];
               const classes = ['solution', ...existingClasses.filter(c => c !== 'solution')];
-              const keyvalue = (((node.attrs as any).keyvalue || []) as Array<[string, string]>);
+              const spacing = (node.attrs as any).spacing || '';
+              const existingKv = (((node.attrs as any).keyvalue || []) as Array<[string, string]>).filter(([k]) => k !== 'spacing');
+              const keyvalue: Array<[string, string]> = [];
+              if (spacing) keyvalue.push(['spacing', spacing]);
+              keyvalue.push(...existingKv);
               output.writeAttr((node.attrs as any).id, classes, keyvalue as unknown as [[string, string]]);
               output.writeArray(() => {
                 output.writeNodes(node);
@@ -147,6 +159,117 @@ const extension = (_context: ExtensionContext): Extension => {
       );
 
       return [insertSolution];
+    },
+
+    plugins: (_schema: Schema) => {
+      class SolutionNodeView implements NodeView {
+        public dom: HTMLElement;
+        public contentDOM: HTMLElement;
+        private readonly view: EditorView;
+        private readonly getPos: () => number;
+        private spacingInput: HTMLInputElement;
+        private updating = false;
+
+        constructor(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
+          this.view = view;
+          this.getPos = getPos as () => number;
+
+          const dom = document.createElement('div');
+          dom.classList.add('solution');
+          dom.draggable = true;
+
+          const header = document.createElement('div');
+          header.classList.add('solution-header');
+          header.setAttribute('contenteditable', 'false');
+
+          const label = document.createElement('span');
+          label.classList.add('solution-label');
+          header.appendChild(label);
+
+          const spacingInput = document.createElement('input');
+          spacingInput.classList.add('solution-spacing');
+          spacingInput.type = 'text';
+          spacingInput.value = String((node.attrs as any).spacing || '');
+          spacingInput.placeholder = 'Spacing';
+          header.appendChild(spacingInput);
+
+          const content = document.createElement('div');
+          content.classList.add('solution-content');
+
+          dom.appendChild(header);
+          dom.appendChild(content);
+
+          const commit = () => {
+            if (this.updating) return;
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const nodeNow = this.view.state.doc.nodeAt(pos);
+            if (!nodeNow) return;
+            const currentSpacing = String(((nodeNow.attrs as any).spacing || ''));
+            const nextSpacing = spacingInput.value;
+            if (currentSpacing === nextSpacing) return;
+            const attrs = { ...(nodeNow.attrs as any), spacing: nextSpacing } as any;
+            const tr = this.view.state.tr.setNodeMarkup(pos, nodeNow.type, attrs);
+            this.view.dispatch(tr);
+          };
+
+          spacingInput.addEventListener('input', commit);
+
+          header.addEventListener('mousedown', (e) => {
+            const el = e.target as HTMLElement | null;
+            if (el && (el === spacingInput || (el.closest && el.closest('input')))) return;
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const tr = this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos));
+            this.view.dispatch(tr);
+          });
+
+          this.dom = dom;
+          this.contentDOM = content;
+          this.spacingInput = spacingInput;
+        }
+
+        update(node: ProsemirrorNode) {
+          if ((node.type as any).name !== 'solution') return false;
+          this.updating = true;
+          try {
+            const spacing = String(((node.attrs as any).spacing || ''));
+            if (this.spacingInput.value !== spacing) this.spacingInput.value = spacing;
+          } finally {
+            this.updating = false;
+          }
+          return true;
+        }
+
+        ignoreMutation(mutation: MutationRecord | { type: 'selection'; target: Element }) {
+          const target = (mutation as MutationRecord).target as Node | undefined;
+          if (target instanceof Element) {
+            if (target === this.spacingInput || target.closest('.solution-header')) return true;
+          }
+          return false;
+        }
+
+        stopEvent(event: Event) {
+          const target = event.target as HTMLElement | null;
+          if (!target) return false;
+          if (target === this.spacingInput || (target.closest && target.closest('.solution-header'))) {
+            return true;
+          }
+          return false;
+        }
+      }
+
+      return [
+        new Plugin({
+          props: {
+            nodeViews: {
+              solution(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
+                return new SolutionNodeView(node, view, getPos);
+              },
+            },
+          },
+        }),
+      ];
     },
   };
 };

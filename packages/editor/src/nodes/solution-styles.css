@@ -25,3 +25,19 @@
   align-items: baseline;
   gap: 0.5rem;
 }
+
+/* Spacing input styled similarly to part points (but purple) */
+.solution-header .solution-spacing {
+  flex: 0 0 auto;
+  width: 5ch; /* slightly larger than part points */
+  text-align: center;
+  margin-left: auto;
+}
+
+.solution-spacing {
+  background-color: #e0ccff; /* light purple */
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin: 0.25rem 0;
+  display: inline-block;
+}
