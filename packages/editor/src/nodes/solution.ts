@@ -189,6 +189,7 @@ const extension = (_context: ExtensionContext): Extension => {
           spaceInput.type = 'text';
           spaceInput.value = String((node.attrs as any).space || '');
           spaceInput.placeholder = 'Space';
+          spaceInput.disabled = true;
           header.appendChild(spaceInput);
 
           const content = document.createElement('div');
@@ -243,6 +244,16 @@ const extension = (_context: ExtensionContext): Extension => {
           };
 
           spaceInput.addEventListener('input', commit);
+          spaceInput.addEventListener('mousedown', () => {
+            if (spaceInput.disabled) {
+              spaceInput.disabled = false;
+              setTimeout(() => {
+                spaceInput.focus();
+                const len = spaceInput.value.length;
+                spaceInput.setSelectionRange(len, len);
+              }, 0);
+            }
+          });
 
           header.addEventListener('mousedown', (e) => {
             const el = e.target as HTMLElement | null;
@@ -260,7 +271,7 @@ const extension = (_context: ExtensionContext): Extension => {
         }
 
         selectNode() {
-          if (this.spaceInput) this.spaceInput.blur();
+          if (this.spaceInput) { this.spaceInput.blur(); this.spaceInput.disabled = true; }
         }
 
         deselectNode() {

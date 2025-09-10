@@ -372,6 +372,7 @@ const extension = (_context: ExtensionContext): Extension => {
           titleInput.type = 'text';
           titleInput.value = String((node.attrs as any).title || '');
           titleInput.placeholder = 'Title';
+          titleInput.disabled = true;
           header.appendChild(titleInput);
 
           const pointsInput = document.createElement('input');
@@ -379,6 +380,7 @@ const extension = (_context: ExtensionContext): Extension => {
           pointsInput.type = 'text';
           pointsInput.value = String((node.attrs as any).points || '');
           pointsInput.placeholder = 'Points';
+          pointsInput.disabled = true;
           header.appendChild(pointsInput);
 
           // (trashcan removed per request)
@@ -409,6 +411,22 @@ const extension = (_context: ExtensionContext): Extension => {
 
           titleInput.addEventListener('input', commit);
           pointsInput.addEventListener('input', commit);
+
+          // Enable inputs only on direct interaction
+          const enableInput = (input: HTMLInputElement) => {
+            if (input.disabled) {
+              input.disabled = false;
+              // Focus after enabling so the user can edit immediately
+              setTimeout(() => {
+                input.focus();
+                // place caret at end
+                const len = input.value.length;
+                input.setSelectionRange(len, len);
+              }, 0);
+            }
+          };
+          titleInput.addEventListener('mousedown', () => enableInput(titleInput));
+          pointsInput.addEventListener('mousedown', () => enableInput(pointsInput));
           // Select the whole node on header mousedown to enable native drag of the block
           header.addEventListener('mousedown', (e) => {
             const el = e.target as HTMLElement | null;
@@ -428,8 +446,8 @@ const extension = (_context: ExtensionContext): Extension => {
 
         selectNode() {
           // Ensure inputs aren't simultaneously selected when the node is selected
-          if (this.titleInput) this.titleInput.blur();
-          if (this.pointsInput) this.pointsInput.blur();
+          if (this.titleInput) { this.titleInput.blur(); this.titleInput.disabled = true; }
+          if (this.pointsInput) { this.pointsInput.blur(); this.pointsInput.disabled = true; }
         }
 
         deselectNode() {
