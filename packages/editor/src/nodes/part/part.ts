@@ -31,6 +31,11 @@ function titleFromAttrs(attrs: any): string {
 
 
 function findPartDepth(state: EditorState, schema: Schema): number | null {
+  // If the whole Part node is selected, treat the selection as if inside the node
+  if (state.selection instanceof NodeSelection && isPart((state.selection as NodeSelection).node, schema)) {
+    // Depth of the selected node is one deeper than $from
+    return state.selection.$from.depth + 1;
+  }
   const { $from } = state.selection;
   for (let d = $from.depth; d >= 1; d--) {
     if (isPart($from.node(d), schema)) return d;
