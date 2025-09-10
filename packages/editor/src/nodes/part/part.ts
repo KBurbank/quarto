@@ -5,7 +5,7 @@
 import { Node as ProsemirrorNode, DOMOutputSpec, Schema } from 'prosemirror-model';
 import { Extension, ExtensionContext } from '../../api/extension';
 import { EditorState, Transaction, Plugin, PluginKey, TextSelection } from 'prosemirror-state';
-import { DecorationSet, Decoration } from 'prosemirror-view';
+import { DecorationSet, Decoration, EditorView, NodeView } from 'prosemirror-view';
 import { gapCursor } from 'prosemirror-gapcursor';
 import './part-styles.css';
 import { ProsemirrorCommand } from '../../api/command';
@@ -28,10 +28,6 @@ function titleFromAttrs(attrs: any): string {
   return found ? found[1] : '';
 }
 
-function partHeader(node: ProsemirrorNode): DOMOutputSpec {
-  const title = titleFromAttrs(node.attrs);
-  return ['div', { class: 'part-header' }, ['span', { class: 'part-label' }], ['span', { class: 'part-title' }, title]];
-}
 
 function findPartDepth(state: EditorState, schema: Schema): number | null {
   const { $from } = state.selection;
@@ -65,8 +61,9 @@ const extension = (_context: ExtensionContext): Extension => {
           attrs: {
             ...pandocAttrSpec,
             title: { default: '' },
+            points: { default: '' },
           },
-          content: '(solution | block)+',
+          content: 'block*',
           group: 'block',
           isolating: true,
           defining: true,
@@ -88,9 +85,19 @@ const extension = (_context: ExtensionContext): Extension => {
                 'part',
               ]
             });
-            (domAttr as any)['data-title'] = titleFromAttrs(node.attrs) || '';
-            return ['div', domAttr as any, partHeader(node), ['div', { class: 'part-content' }, 0]];
+            const headerTitle = ((node.attrs as any).title as string) || titleFromAttrs(node.attrs) || '';
+            const headerPoints = ((node.attrs as any).points as string) || '';
+            (domAttr as any)['data-title'] = headerTitle;
+            return ['div', domAttr as any,
+              ['div', { class: 'part-header' },
+                ['span', { class: 'part-label' }],
+                ['span', { class: 'part-title' }, headerTitle],
+                ['span', { class: 'part-points' }, headerPoints]
+              ],
+              ['div', { class: 'part_content' }, 0]
+            ];
           },
+          // use default createAndFill
         },
 
         // native attribute editor hook (kebab button on the right)
@@ -116,9 +123,16 @@ const extension = (_context: ExtensionContext): Extension => {
               getAttrs: (tok: PandocToken) => {
                 const attr = pandocAttrReadAST(tok, 0);
                 const title = (attr.keyvalue || []).find(([k]: [string, string]) => k === 'title')?.[1] || '';
-                return { ...attr, title } as { [key: string]: unknown };
+                const points = (attr.keyvalue || []).find(([k]: [string, string]) => k === 'points')?.[1] || '';
+                return { ...attr, title, points } as { [key: string]: unknown };
               },
-              getChildren: (tok: PandocToken) => tok.c[1],
+              getChildren: (tok: PandocToken) => {
+                const children = (tok.c[1] as PandocToken[]) || [];
+                if (children.length === 0) {
+                  return [{ t: 'Para', c: [] } as unknown as PandocToken];
+                }
+                return children;
+              },
             },
           ],
           writer: (output: PandocOutput, node) => {
@@ -126,12 +140,19 @@ const extension = (_context: ExtensionContext): Extension => {
             output.writeToken(PandocTokenType.Div, () => {
               const existingClasses = ((node.attrs as any).classes || []) as string[];
               const classes = ['part', ...existingClasses.filter(c => c !== 'part')];
-              // merge keyvalue with title override if present
-              const existingKv = (((node.attrs as any).keyvalue || []) as Array<[string, string]>).filter(([k]) => k !== 'title');
-              const title = titleFromAttrs(node.attrs);
-              const keyvalue = title ? ([['title', title] as [string, string]].concat(existingKv)) : existingKv;
+              // Use attrs for title and points
+              const title = (node.attrs as any).title || '';
+              const points = (node.attrs as any).points || '';
+              // merge keyvalue with title and points
+              const existingKv = (((node.attrs as any).keyvalue || []) as Array<[string, string]>).filter(([k]) => k !== 'title' && k !== 'points');
+              const keyvalue: Array<[string, string]> = [];
+              if (title) keyvalue.push(['title', title]);
+              if (points) keyvalue.push(['points', points]);
+              keyvalue.push(...existingKv);
+
               output.writeAttr((node.attrs as any).id, classes, keyvalue as unknown as [[string, string]]);
               output.writeArray(() => {
+                // Write all children as content
                 output.writeNodes(node);
               });
             });
@@ -146,11 +167,19 @@ const extension = (_context: ExtensionContext): Extension => {
         [],
         (state: EditorState, dispatch?: (tr: Transaction) => void) => {
           const typePart = (schema.nodes as any).part;
-          if (!dispatch || !typePart) return !!typePart;
           const paraType = (schema.nodes as any).paragraph;
-          const inner = paraType?.createAndFill();
-          const part = typePart.createAndFill({ title: '' }, inner ? [inner] : undefined);
-          if (!part) return false;
+          if (!dispatch || !typePart) return !!typePart;
+
+          // Create optional initial paragraph content
+          const contentPara = paraType?.createAndFill();
+          const children = contentPara ? [contentPara] : undefined;
+
+          const part = typePart.createAndFill({ title: '', points: '' }, children as any);
+          if (!part) {
+            console.error('Failed to create part node');
+            return false;
+          }
+
           const insertPos = state.selection.from;
           let tr = state.tr.replaceSelectionWith(part, false);
           // place cursor just inside the new node (at its start + 1)
@@ -313,6 +342,119 @@ const extension = (_context: ExtensionContext): Extension => {
     },
 
     plugins: (schema: Schema) => {
+      class PartNodeView implements NodeView {
+        public dom: HTMLElement;
+        public contentDOM: HTMLElement;
+        private readonly view: EditorView;
+        private readonly getPos: () => number;
+        private titleInput: HTMLInputElement;
+        private pointsInput: HTMLInputElement;
+        private updating = false;
+
+        constructor(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
+          this.view = view;
+          this.getPos = getPos as () => number;
+
+          // Outer container
+          const dom = document.createElement('div');
+          dom.classList.add('part');
+
+          // Header
+          const header = document.createElement('div');
+          header.classList.add('part-header');
+          // Prevent caret/selection in header (except inputs)
+          header.setAttribute('contenteditable', 'false');
+
+          const label = document.createElement('span');
+          label.classList.add('part-label');
+          header.appendChild(label);
+
+          const titleInput = document.createElement('input');
+          titleInput.classList.add('part-title');
+          titleInput.type = 'text';
+          titleInput.value = String((node.attrs as any).title || '');
+          titleInput.placeholder = 'Title';
+          header.appendChild(titleInput);
+
+          const pointsInput = document.createElement('input');
+          pointsInput.classList.add('part-points');
+          pointsInput.type = 'text';
+          pointsInput.value = String((node.attrs as any).points || '');
+          pointsInput.placeholder = 'Points';
+          header.appendChild(pointsInput);
+
+          // Content container
+          const content = document.createElement('div');
+          content.classList.add('part_content');
+
+          dom.appendChild(header);
+          dom.appendChild(content);
+
+          // Wire events
+          const commit = () => {
+            if (this.updating) return;
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const nodeNow = this.view.state.doc.nodeAt(pos);
+            if (!nodeNow) return;
+            const currentTitle = String(((nodeNow.attrs as any).title || ''));
+            const currentPoints = String(((nodeNow.attrs as any).points || ''));
+            const nextTitle = titleInput.value;
+            const nextPoints = pointsInput.value;
+            if (currentTitle === nextTitle && currentPoints === nextPoints) return;
+            const attrs = { ...(nodeNow.attrs as any), title: nextTitle, points: nextPoints } as any;
+            const tr = this.view.state.tr.setNodeMarkup(pos, nodeNow.type, attrs);
+            this.view.dispatch(tr);
+          };
+
+          titleInput.addEventListener('input', commit);
+          pointsInput.addEventListener('input', commit);
+          // Prevent clicks on header chrome from moving the insertion point
+          header.addEventListener('mousedown', (e) => {
+            const el = e.target as HTMLElement | null;
+            if (el && (el === titleInput || el === pointsInput || el.closest('input'))) return;
+            e.preventDefault();
+          });
+
+          this.dom = dom;
+          this.contentDOM = content;
+          this.titleInput = titleInput;
+          this.pointsInput = pointsInput;
+        }
+
+        update(node: ProsemirrorNode) {
+          if ((node.type as any).name !== 'part') return false;
+          this.updating = true;
+          try {
+            const title = String(((node.attrs as any).title || ''));
+            const points = String(((node.attrs as any).points || ''));
+            if (this.titleInput.value !== title) this.titleInput.value = title;
+            if (this.pointsInput.value !== points) this.pointsInput.value = points;
+          } finally {
+            this.updating = false;
+          }
+          return true;
+        }
+
+        ignoreMutation(mutation: MutationRecord | { type: 'selection'; target: Element }) {
+          // Ignore header input mutations
+          const target = (mutation as MutationRecord).target as Node | undefined;
+          if (target instanceof Element) {
+            if (target === this.titleInput || target === this.pointsInput || target.closest('.part-header')) return true;
+          }
+          return false;
+        }
+
+        stopEvent(event: Event) {
+          const target = event.target as HTMLElement | null;
+          if (!target) return false;
+          // Let inputs handle their own events
+          if (target === this.titleInput || target === this.pointsInput || target.closest && target.closest('.part-header')) {
+            return true;
+          }
+          return false;
+        }
+      }
       const key = new PluginKey<DecorationSet>('part-structure-level');
 
       function buildDecorations(state: EditorState): DecorationSet {
@@ -337,6 +479,15 @@ const extension = (_context: ExtensionContext): Extension => {
 
       return [
         gapCursor(),
+        new Plugin({
+          props: {
+            nodeViews: {
+              part(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
+                return new PartNodeView(node, view, getPos);
+              },
+            },
+          },
+        }),
         // Auto-insert a paragraph when clicking at a gap position inside a Part
         new Plugin({
           props: {
@@ -385,8 +536,10 @@ const extension = (_context: ExtensionContext): Extension => {
         }),
 
         // Sync keyvalue['title'] -> attrs.title to keep attrs.title the single source of truth
+        // DISABLED: Sync plugins disabled for now
+        /*
         new Plugin({
-          key: new PluginKey('part-title-sync'),
+          key: new PluginKey('part_title-sync'),
           appendTransaction: (_trs, _old, newState) => {
             const partType = (schema.nodes as any).part;
             let tr: Transaction | null = null;
@@ -406,6 +559,7 @@ const extension = (_context: ExtensionContext): Extension => {
             return tr || undefined;
           }
         }),
+        */
       ];
     },
   };
