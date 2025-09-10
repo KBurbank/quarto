@@ -259,6 +259,14 @@ const extension = (_context: ExtensionContext): Extension => {
           this.spaceInput = spaceInput;
         }
 
+        selectNode() {
+          if (this.spaceInput) this.spaceInput.blur();
+        }
+
+        deselectNode() {
+          // No-op
+        }
+
         update(node: ProsemirrorNode) {
           if ((node.type as any).name !== 'solution') return false;
           this.updating = true;

@@ -426,6 +426,16 @@ const extension = (_context: ExtensionContext): Extension => {
           this.pointsInput = pointsInput;
         }
 
+        selectNode() {
+          // Ensure inputs aren't simultaneously selected when the node is selected
+          if (this.titleInput) this.titleInput.blur();
+          if (this.pointsInput) this.pointsInput.blur();
+        }
+
+        deselectNode() {
+          // No-op; ProseMirror manages selection class
+        }
+
         update(node: ProsemirrorNode) {
           if ((node.type as any).name !== 'part') return false;
           this.updating = true;
