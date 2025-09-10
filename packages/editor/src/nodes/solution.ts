@@ -254,29 +254,9 @@ const extension = (_context: ExtensionContext): Extension => {
             this.view.dispatch(tr);
           });
 
-          header.addEventListener('keydown', () => {
-            const sel = this.view.state.selection;
-            if (!(sel instanceof NodeSelection)) return;
-            const pos = this.getPos();
-            if (typeof pos !== 'number') return;
-            const nodeNow = this.view.state.doc.nodeAt(pos);
-            if (!nodeNow) return;
-            const endPos = pos + nodeNow.nodeSize - 1;
-            const tr = this.view.state.tr.setSelection(TextSelection.create(this.view.state.doc, endPos));
-            this.view.dispatch(tr);
-          });
-
           this.dom = dom;
           this.contentDOM = content;
           this.spaceInput = spaceInput;
-        }
-
-        selectNode() {
-          if (this.spaceInput) { this.spaceInput.blur(); }
-        }
-
-        deselectNode() {
-          // No-op
         }
 
         update(node: ProsemirrorNode) {
@@ -308,6 +288,15 @@ const extension = (_context: ExtensionContext): Extension => {
             return true;
           }
           return false;
+        }
+        
+        selectNode() {
+          this.dom.classList.add('node-selected');
+          if (this.spaceInput) this.spaceInput.blur();
+        }
+
+        deselectNode() {
+          this.dom.classList.remove('node-selected');
         }
       }
 

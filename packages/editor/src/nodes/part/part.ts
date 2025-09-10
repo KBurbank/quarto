@@ -409,8 +409,6 @@ const extension = (_context: ExtensionContext): Extension => {
 
           titleInput.addEventListener('input', commit);
           pointsInput.addEventListener('input', commit);
-
-          // Inputs are always editable; header container is non-editable
           // Select the whole node on header mousedown to enable native drag of the block
           header.addEventListener('mousedown', (e) => {
             const el = e.target as HTMLElement | null;
@@ -422,33 +420,10 @@ const extension = (_context: ExtensionContext): Extension => {
             this.view.dispatch(tr);
           });
 
-          // When the node is selected, move caret to the end of content on any key press
-          header.addEventListener('keydown', () => {
-            const sel = this.view.state.selection;
-            if (!(sel instanceof NodeSelection)) return;
-            const pos = this.getPos();
-            if (typeof pos !== 'number') return;
-            const nodeNow = this.view.state.doc.nodeAt(pos);
-            if (!nodeNow) return;
-            const endPos = pos + nodeNow.nodeSize - 1; // inside end
-            const tr = this.view.state.tr.setSelection(TextSelection.create(this.view.state.doc, endPos));
-            this.view.dispatch(tr);
-          });
-
           this.dom = dom;
           this.contentDOM = content;
           this.titleInput = titleInput;
           this.pointsInput = pointsInput;
-        }
-
-        selectNode() {
-          // Ensure inputs aren't simultaneously selected when the node is selected
-          if (this.titleInput) { this.titleInput.blur(); }
-          if (this.pointsInput) { this.pointsInput.blur(); }
-        }
-
-        deselectNode() {
-          // No-op; ProseMirror manages selection class
         }
 
         update(node: ProsemirrorNode) {
@@ -482,6 +457,16 @@ const extension = (_context: ExtensionContext): Extension => {
             return true;
           }
           return false;
+        }
+        
+        selectNode() {
+          this.dom.classList.add('node-selected');
+          if (this.titleInput) this.titleInput.blur();
+          if (this.pointsInput) this.pointsInput.blur();
+        }
+
+        deselectNode() {
+          this.dom.classList.remove('node-selected');
         }
       }
       const key = new PluginKey<DecorationSet>('part-structure-level');

@@ -26,33 +26,9 @@
   gap: 0.5rem;
 }
 
-/* Space input styled similarly to part points (but purple) */
-.solution-header .solution-space {
-  flex: 0 0 auto;
-  width: 5ch; /* slightly larger than part points */
-  text-align: center;
-  margin-left: auto;
-}
-
-.solution-space {
-  background-color: #e0ccff; /* light purple */
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  margin: 0.25rem 0;
-  display: inline-block;
-}
-
 /* Collapsible behavior */
 .solution.collapsed > .solution-content { display: none; }
 
-/* Fold indicator and clickable label */
-.solution-header .solution-label { cursor: pointer; user-select: none; }
-.solution-header .solution-label::before { content: "▾ Solution:"; display: inline-block; }
-.solution.collapsed > .solution-header .solution-label::before { content: "▸ Solution:"; }
-
-/* When the Solution node is selected, suppress native text selection paint */
-.ProseMirror-selectednode.solution * { user-select: none; }
-.ProseMirror-selectednode.solution::selection { background: transparent; color: inherit; }
-.ProseMirror-selectednode.solution::-moz-selection { background: transparent; color: inherit; }
-.ProseMirror-selectednode.solution *::selection { background: transparent; color: inherit; }
-.ProseMirror-selectednode.solution *::-moz-selection { background: transparent; color: inherit; }
+/* When the node is selected, suppress browser text selection paint */
+.solution.node-selected, .solution.node-selected * { user-select: none; -webkit-user-select: none; }
+.solution.node-selected ::selection { background: transparent; color: inherit; }
