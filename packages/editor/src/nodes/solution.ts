@@ -220,7 +220,7 @@ const extension = (_context: ExtensionContext): Extension => {
             const tr = this.view.state.tr.setNodeMarkup(pos, nodeNow.type, attrs);
             this.view.dispatch(tr);
           };
-          label.addEventListener('click', (e) => { toggle(); });
+          label.addEventListener('click', () => { toggle(); });
           label.addEventListener('keydown', (e: KeyboardEvent) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
