@@ -18,6 +18,23 @@
 
 .part-content { margin-left: 0.5rem; }
 
+/* Part title and points styling */
+.part-title {
+  background-color: lightblue;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin: 0.25rem 0;
+  display: inline-block;
+}
+
+.part-points {
+  background-color: lightgreen;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin: 0.25rem 0;
+  display: inline-block;
+}
+
 /* Dynamic headers by structural level with counters */
 :root { counter-reset: question; }
 

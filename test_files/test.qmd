@@ -11,6 +11,9 @@ format:
       filters: ["../part-filter.lua"]
 ---
 
-::: {.part title="a title" points="10"}
-content
+:::: {.part title="This is a great ?" points="12"}
+another part
+
+::: {.part title="Some other title" points="3"}
 :::
+::::

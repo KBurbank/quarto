@@ -50,7 +50,7 @@ function pandocFormatConfigFromYamlInCode(code: string, isRmd: boolean): PandocF
   // did we find yaml?
   if (yaml) {
     // see if we have any md_extensions defined
-    let mdExtensions : string | undefined = isRmd ? findValue('md_extensions', yaml?.output as Record<string,unknown>) : undefined;
+    let mdExtensions: string | undefined = isRmd ? findValue('md_extensions', yaml?.output as Record<string, unknown>) : undefined;
     if (!mdExtensions) {
       // look for quarto 'from'
       const from = findValue('from', yaml);
@@ -69,8 +69,8 @@ function pandocFormatConfigFromYamlInCode(code: string, isRmd: boolean): PandocF
     // first check 'editor' then check 'editor_options'
     const yamlEditor = yaml?.editor;
 
-    if (yamlEditor && (yamlEditor instanceof Object) && 
-        yamlEditor.markdown && (yamlEditor.markdown instanceof Object)) {
+    if (yamlEditor && (yamlEditor instanceof Object) &&
+      yamlEditor.markdown && (yamlEditor.markdown instanceof Object)) {
       yamlFormatConfig = readPandocFormatConfig(yamlEditor.markdown);
     } else {
       const yamlMarkdownOptions = yaml?.editor_options?.markdown;
@@ -151,7 +151,7 @@ function pandocFormatConfigFromCommentInDoc(doc: ProsemirrorNode): PandocFormatC
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function readPandocFormatConfig(source: Record<string,any>) {
+function readPandocFormatConfig(source: Record<string, any>) {
   const asString = (obj: unknown): string => {
     if (typeof obj === 'string') {
       return obj;
@@ -312,13 +312,15 @@ export function pandocFormatWith(format: string, prepend: string, append: string
 }
 
 export function splitPandocFormatString(format: string) {
+  // Be defensive in case callers pass an undefined or non-string value
+  const fmt = typeof format === 'string' ? format : '';
   // split out base format from options
-  let optionsPos = format.indexOf('-');
+  let optionsPos = fmt.indexOf('-');
   if (optionsPos === -1) {
-    optionsPos = format.indexOf('+');
+    optionsPos = fmt.indexOf('+');
   }
-  const base = optionsPos === -1 ? format : format.substr(0, optionsPos);
-  const options = optionsPos === -1 ? '' : format.substr(optionsPos);
+  const base = optionsPos === -1 ? fmt : fmt.substr(0, optionsPos);
+  const options = optionsPos === -1 ? '' : fmt.substr(optionsPos);
   return {
     format: base,
     options,

@@ -5,7 +5,7 @@
 import { Node as ProsemirrorNode, DOMOutputSpec, Schema } from 'prosemirror-model';
 import { Extension, ExtensionContext } from '../../api/extension';
 import { EditorState, Transaction, Plugin, PluginKey, TextSelection } from 'prosemirror-state';
-import { DecorationSet, Decoration } from 'prosemirror-view';
+import { DecorationSet, Decoration, EditorView, NodeView } from 'prosemirror-view';
 import { gapCursor } from 'prosemirror-gapcursor';
 import './part-styles.css';
 import { ProsemirrorCommand } from '../../api/command';
@@ -28,10 +28,6 @@ function titleFromAttrs(attrs: any): string {
   return found ? found[1] : '';
 }
 
-function partHeader(node: ProsemirrorNode): DOMOutputSpec {
-  const title = titleFromAttrs(node.attrs);
-  return ['div', { class: 'part-header' }, ['span', { class: 'part-label' }], ['span', { class: 'part_title' }, title]];
-}
 
 function findPartDepth(state: EditorState, schema: Schema): number | null {
   const { $from } = state.selection;
@@ -60,135 +56,6 @@ const extension = (_context: ExtensionContext): Extension => {
   return {
     nodes: [
       {
-        name: 'part_title',
-        spec: {
-          content: 'block*',
-          group: 'block',
-          parseDOM: [
-            {
-              tag: 'div.part-title',
-            },
-          ],
-          toDOM(): DOMOutputSpec {
-            return ['div', { class: 'part-title' }, 0];
-          },
-        },
-        pandoc: {
-          readers: [
-            {
-              token: PandocTokenType.Div,
-              match: (tok: PandocToken) => {
-                try {
-                  const attr = pandocAttrReadAST(tok, 0);
-                  return Array.isArray(attr.classes) && attr.classes.includes('part-title');
-                } catch {
-                  return false;
-                }
-              },
-              block: 'part_title',
-              getAttrs: (tok: PandocToken) => {
-                return pandocAttrReadAST(tok, 0);
-              },
-              getChildren: (tok: PandocToken) => tok.c[1],
-            },
-          ],
-          writer: (output: PandocOutput, node) => {
-            output.writeToken(PandocTokenType.Div, () => {
-              output.writeAttr('', ['part-title'], [] as unknown as [[string, string]]);
-              output.writeArray(() => {
-                output.writeNodes(node);
-              });
-            });
-          },
-        },
-      },
-      {
-        name: 'part_points',
-        spec: {
-          content: 'block*',
-          group: 'block',
-          parseDOM: [
-            {
-              tag: 'div.part-points',
-            },
-          ],
-          toDOM(): DOMOutputSpec {
-            return ['div', { class: 'part-points' }, 0];
-          },
-        },
-        pandoc: {
-          readers: [
-            {
-              token: PandocTokenType.Div,
-              match: (tok: PandocToken) => {
-                try {
-                  const attr = pandocAttrReadAST(tok, 0);
-                  return Array.isArray(attr.classes) && attr.classes.includes('part-points');
-                } catch {
-                  return false;
-                }
-              },
-              block: 'part_points',
-              getAttrs: (tok: PandocToken) => {
-                return pandocAttrReadAST(tok, 0);
-              },
-              getChildren: (tok: PandocToken) => tok.c[1],
-            },
-          ],
-          writer: (output: PandocOutput, node) => {
-            output.writeToken(PandocTokenType.Div, () => {
-              output.writeAttr('', ['part-points'], [] as unknown as [[string, string]]);
-              output.writeArray(() => {
-                output.writeNodes(node);
-              });
-            });
-          },
-        },
-      },
-      {
-        name: 'part_content',
-        spec: {
-          content: 'block*',
-          group: 'block',
-          parseDOM: [
-            {
-              tag: 'div.part-content',
-            },
-          ],
-          toDOM(): DOMOutputSpec {
-            return ['div', { class: 'part-content' }, 0];
-          },
-        },
-        pandoc: {
-          readers: [
-            {
-              token: PandocTokenType.Div,
-              match: (tok: PandocToken) => {
-                try {
-                  const attr = pandocAttrReadAST(tok, 0);
-                  return Array.isArray(attr.classes) && attr.classes.includes('part-content');
-                } catch {
-                  return false;
-                }
-              },
-              block: 'part_content',
-              getAttrs: (tok: PandocToken) => {
-                return pandocAttrReadAST(tok, 0);
-              },
-              getChildren: (tok: PandocToken) => tok.c[1],
-            },
-          ],
-          writer: (output: PandocOutput, node) => {
-            output.writeToken(PandocTokenType.Div, () => {
-              output.writeAttr('', ['part-content'], [] as unknown as [[string, string]]);
-              output.writeArray(() => {
-                output.writeNodes(node);
-              });
-            });
-          },
-        },
-      },
-      {
         name: 'part',
         spec: {
           attrs: {
@@ -196,7 +63,7 @@ const extension = (_context: ExtensionContext): Extension => {
             title: { default: '' },
             points: { default: '' },
           },
-          content: 'part_title part_points part_content?',
+          content: 'block*',
           group: 'block',
           isolating: true,
           defining: true,
@@ -218,31 +85,19 @@ const extension = (_context: ExtensionContext): Extension => {
                 'part',
               ]
             });
-            (domAttr as any)['data-title'] = titleFromAttrs(node.attrs) || '';
-            return ['div', domAttr as any, partHeader(node), ['div', { class: 'part_content' }, 0]];
+            const headerTitle = ((node.attrs as any).title as string) || titleFromAttrs(node.attrs) || '';
+            const headerPoints = ((node.attrs as any).points as string) || '';
+            (domAttr as any)['data-title'] = headerTitle;
+            return ['div', domAttr as any,
+              ['div', { class: 'part-header' },
+                ['span', { class: 'part-label' }],
+                ['span', { class: 'part-title' }, headerTitle],
+                ['span', { class: 'part-points' }, headerPoints]
+              ],
+              ['div', { class: 'part_content' }, 0]
+            ];
           },
-          createAndFill(attrs: any, content?: ProsemirrorNode[]): ProsemirrorNode | null {
-            const schema = this.schema;
-            const partTitleType = (schema.nodes as any).part_title;
-            const partPointsType = (schema.nodes as any).part_points;
-            const partContentType = (schema.nodes as any).part_content;
-            const paragraphType = (schema.nodes as any).paragraph;
-
-            // Create default children if not provided
-            if (!content || content.length === 0) {
-              const titlePara = paragraphType?.createAndFill();
-              const pointsPara = paragraphType?.createAndFill();
-              const contentPara = paragraphType?.createAndFill();
-
-              const titleNode = partTitleType?.createAndFill({}, titlePara ? [titlePara] : []);
-              const pointsNode = partPointsType?.createAndFill({}, pointsPara ? [pointsPara] : []);
-              const contentNode = partContentType?.createAndFill({}, contentPara ? [contentPara] : []);
-
-              content = [titleNode, pointsNode, contentNode].filter(Boolean);
-            }
-
-            return this.create(attrs, content);
-          },
+          // use default createAndFill
         },
 
         // native attribute editor hook (kebab button on the right)
@@ -271,64 +126,7 @@ const extension = (_context: ExtensionContext): Extension => {
                 const points = (attr.keyvalue || []).find(([k]: [string, string]) => k === 'points')?.[1] || '';
                 return { ...attr, title, points } as { [key: string]: unknown };
               },
-              getChildren: (tok: PandocToken) => {
-                const children = tok.c[1] as PandocToken[];
-                const attr = pandocAttrReadAST(tok, 0);
-                const title = (attr.keyvalue || []).find(([k]: [string, string]) => k === 'title')?.[1] || '';
-                const points = (attr.keyvalue || []).find(([k]: [string, string]) => k === 'points')?.[1] || '';
-
-                // Create the proper structure: part_title, part_points, part_content
-                const result: any[] = [];
-
-                // Create part_title div
-                if (title) {
-                  result.push({
-                    t: 'Div',
-                    c: [
-                      ['', ['part-title'], []],
-                      [{ t: 'Para', c: [{ t: 'Str', c: title }] }]
-                    ]
-                  });
-                } else {
-                  result.push({
-                    t: 'Div',
-                    c: [
-                      ['', ['part-title'], []],
-                      [{ t: 'Para', c: [] }]
-                    ]
-                  });
-                }
-
-                // Create part_points div
-                if (points) {
-                  result.push({
-                    t: 'Div',
-                    c: [
-                      ['', ['part-points'], []],
-                      [{ t: 'Para', c: [{ t: 'Str', c: points }] }]
-                    ]
-                  });
-                } else {
-                  result.push({
-                    t: 'Div',
-                    c: [
-                      ['', ['part-points'], []],
-                      [{ t: 'Para', c: [] }]
-                    ]
-                  });
-                }
-
-                // Create part_content div with original content
-                result.push({
-                  t: 'Div',
-                  c: [
-                    ['', ['part-content'], []],
-                    children.length > 0 ? children : [{ t: 'Para', c: [] }]
-                  ]
-                });
-
-                return result;
-              },
+              getChildren: (tok: PandocToken) => (tok.c[1] as PandocToken[]),
             },
           ],
           writer: (output: PandocOutput, node) => {
@@ -336,11 +134,9 @@ const extension = (_context: ExtensionContext): Extension => {
             output.writeToken(PandocTokenType.Div, () => {
               const existingClasses = ((node.attrs as any).classes || []) as string[];
               const classes = ['part', ...existingClasses.filter(c => c !== 'part')];
-
-              // Extract title and points from child nodes
-              const title = node.child(0) ? node.child(0).textContent || '' : '';
-              const points = node.child(1) ? node.child(1).textContent || '' : '';
-
+              // Use attrs for title and points
+              const title = (node.attrs as any).title || '';
+              const points = (node.attrs as any).points || '';
               // merge keyvalue with title and points
               const existingKv = (((node.attrs as any).keyvalue || []) as Array<[string, string]>).filter(([k]) => k !== 'title' && k !== 'points');
               const keyvalue: Array<[string, string]> = [];
@@ -350,10 +146,8 @@ const extension = (_context: ExtensionContext): Extension => {
 
               output.writeAttr((node.attrs as any).id, classes, keyvalue as unknown as [[string, string]]);
               output.writeArray(() => {
-                // Write only the part-content (children 2+)
-                for (let i = 2; i < node.childCount; i++) {
-                  output.writeNodes(node.child(i));
-                }
+                // Write all children as content
+                output.writeNodes(node);
               });
             });
           },
@@ -367,31 +161,14 @@ const extension = (_context: ExtensionContext): Extension => {
         [],
         (state: EditorState, dispatch?: (tr: Transaction) => void) => {
           const typePart = (schema.nodes as any).part;
-          const typePartTitle = (schema.nodes as any).part_title;
-          const typePartPoints = (schema.nodes as any).part_points;
-          const typePartContent = (schema.nodes as any).part_content;
           const paraType = (schema.nodes as any).paragraph;
-          if (!dispatch || !typePart || !typePartTitle || !typePartPoints || !typePartContent) return !!typePart;
+          if (!dispatch || !typePart) return !!typePart;
 
-          // Create the required structure: part_title part_points part_content
-          const titlePara = paraType?.createAndFill();
-          const pointsPara = paraType?.createAndFill();
+          // Create optional initial paragraph content
           const contentPara = paraType?.createAndFill();
+          const children = contentPara ? [contentPara] : undefined;
 
-          // Create child nodes with proper null checks
-          const titleNode = typePartTitle.createAndFill({}, titlePara ? [titlePara] : []);
-          const pointsNode = typePartPoints.createAndFill({}, pointsPara ? [pointsPara] : []);
-          const contentNode = typePartContent.createAndFill({}, contentPara ? [contentPara] : []);
-
-          // Check if any child node creation failed
-          if (!titleNode || !pointsNode || !contentNode) {
-            console.error('Failed to create part child nodes:', { titleNode, pointsNode, contentNode });
-            return false;
-          }
-
-          // Create part with all three children
-          const children = [titleNode, pointsNode, contentNode];
-          const part = typePart.createAndFill({ title: '', points: '' }, children);
+          const part = typePart.createAndFill({ title: '', points: '' }, children as any);
           if (!part) {
             console.error('Failed to create part node');
             return false;
@@ -559,6 +336,111 @@ const extension = (_context: ExtensionContext): Extension => {
     },
 
     plugins: (schema: Schema) => {
+      class PartNodeView implements NodeView {
+        public dom: HTMLElement;
+        public contentDOM: HTMLElement;
+        private readonly view: EditorView;
+        private readonly getPos: () => number;
+        private titleInput: HTMLInputElement;
+        private pointsInput: HTMLInputElement;
+        private updating = false;
+
+        constructor(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
+          this.view = view;
+          this.getPos = getPos as () => number;
+
+          // Outer container
+          const dom = document.createElement('div');
+          dom.classList.add('part');
+
+          // Header
+          const header = document.createElement('div');
+          header.classList.add('part-header');
+
+          const label = document.createElement('span');
+          label.classList.add('part-label');
+          header.appendChild(label);
+
+          const titleInput = document.createElement('input');
+          titleInput.classList.add('part-title');
+          titleInput.type = 'text';
+          titleInput.value = String((node.attrs as any).title || '');
+          titleInput.placeholder = 'Title';
+          header.appendChild(titleInput);
+
+          const pointsInput = document.createElement('input');
+          pointsInput.classList.add('part-points');
+          pointsInput.type = 'text';
+          pointsInput.value = String((node.attrs as any).points || '');
+          pointsInput.placeholder = 'Points';
+          header.appendChild(pointsInput);
+
+          // Content container
+          const content = document.createElement('div');
+          content.classList.add('part_content');
+
+          dom.appendChild(header);
+          dom.appendChild(content);
+
+          // Wire events
+          const commit = () => {
+            if (this.updating) return;
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const nodeNow = this.view.state.doc.nodeAt(pos);
+            if (!nodeNow) return;
+            const currentTitle = String(((nodeNow.attrs as any).title || ''));
+            const currentPoints = String(((nodeNow.attrs as any).points || ''));
+            const nextTitle = titleInput.value;
+            const nextPoints = pointsInput.value;
+            if (currentTitle === nextTitle && currentPoints === nextPoints) return;
+            const attrs = { ...(nodeNow.attrs as any), title: nextTitle, points: nextPoints } as any;
+            const tr = this.view.state.tr.setNodeMarkup(pos, nodeNow.type, attrs);
+            this.view.dispatch(tr);
+          };
+
+          titleInput.addEventListener('input', commit);
+          pointsInput.addEventListener('input', commit);
+
+          this.dom = dom;
+          this.contentDOM = content;
+          this.titleInput = titleInput;
+          this.pointsInput = pointsInput;
+        }
+
+        update(node: ProsemirrorNode) {
+          if ((node.type as any).name !== 'part') return false;
+          this.updating = true;
+          try {
+            const title = String(((node.attrs as any).title || ''));
+            const points = String(((node.attrs as any).points || ''));
+            if (this.titleInput.value !== title) this.titleInput.value = title;
+            if (this.pointsInput.value !== points) this.pointsInput.value = points;
+          } finally {
+            this.updating = false;
+          }
+          return true;
+        }
+
+        ignoreMutation(mutation: MutationRecord | { type: 'selection'; target: Element }) {
+          // Ignore header input mutations
+          const target = (mutation as MutationRecord).target as Node | undefined;
+          if (target instanceof Element) {
+            if (target === this.titleInput || target === this.pointsInput || target.closest('.part-header')) return true;
+          }
+          return false;
+        }
+
+        stopEvent(event: Event) {
+          const target = event.target as HTMLElement | null;
+          if (!target) return false;
+          // Let inputs handle their own events
+          if (target === this.titleInput || target === this.pointsInput || target.closest && target.closest('.part-header')) {
+            return true;
+          }
+          return false;
+        }
+      }
       const key = new PluginKey<DecorationSet>('part-structure-level');
 
       function buildDecorations(state: EditorState): DecorationSet {
@@ -583,6 +465,15 @@ const extension = (_context: ExtensionContext): Extension => {
 
       return [
         gapCursor(),
+        new Plugin({
+          props: {
+            nodeViews: {
+              part(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
+                return new PartNodeView(node, view, getPos);
+              },
+            },
+          },
+        }),
         // Auto-insert a paragraph when clicking at a gap position inside a Part
         new Plugin({
           props: {
