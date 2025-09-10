@@ -304,17 +304,17 @@ const extension = (_context: ExtensionContext): Extension => {
         new Plugin({
           props: {
             handleKeyDown(view, event) {
-              if (event.key !== 'Backspace') return false;
               const state = view.state;
               if (!(state.selection instanceof TextSelection) || !state.selection.empty) return false;
               const depth = findSolutionDepth(state, _schema);
               if (depth == null) return false;
               const $from = state.selection.$from;
-              if ($from.index(depth) !== 0) return false;
-              if ($from.parentOffset !== 0) return false;
               const container = $from.node(depth);
-              if (container.childCount === 1) {
-                return true;
+              if (container.childCount !== 1) return false;
+              if (event.key === 'Backspace' && $from.parentOffset === 0) return true;
+              if (event.key === 'Delete') {
+                const atEnd = $from.parentOffset === $from.parent.content.size;
+                if (atEnd) return true;
               }
               return false;
             },

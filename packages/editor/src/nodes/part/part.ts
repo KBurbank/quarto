@@ -487,18 +487,19 @@ const extension = (_context: ExtensionContext): Extension => {
         new Plugin({
           props: {
             handleKeyDown(view, event) {
-              if (event.key !== 'Backspace') return false;
               const state = view.state;
               if (!(state.selection instanceof TextSelection) || !state.selection.empty) return false;
               const depth = findPartDepth(state, schema);
               if (depth == null) return false;
               const $from = state.selection.$from;
-              // ensure caret is at start of first child within the Part
-              if ($from.index(depth) !== 0) return false;
-              if ($from.parentOffset !== 0) return false;
               const container = $from.node(depth);
-              if (container.childCount === 1) {
-                return true; // block exiting the Part
+              if (container.childCount !== 1) return false;
+              // Block Backspace at start of the single child
+              if (event.key === 'Backspace' && $from.parentOffset === 0) return true;
+              // Block Delete at end of the single child
+              if (event.key === 'Delete') {
+                const atEnd = $from.parentOffset === $from.parent.content.size;
+                if (atEnd) return true;
               }
               return false;
             },
