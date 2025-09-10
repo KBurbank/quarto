@@ -197,7 +197,27 @@ const extension = (_context: ExtensionContext): Extension => {
           dom.appendChild(header);
           dom.appendChild(content);
 
-          label.addEventListener('click', (e) => { e.preventDefault(); dom.classList.toggle('collapsed'); });
+          // initialize collapsed class from attrs.classes
+          const hasCollapsedClass = (((node.attrs as any).classes || []) as string[]).includes('collapsed');
+          if (hasCollapsedClass) dom.classList.add('collapsed');
+
+          // toggle persisted 'collapsed' class on click of label
+          label.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const nodeNow = this.view.state.doc.nodeAt(pos);
+            if (!nodeNow) return;
+            const classes = new Set<string>((((nodeNow.attrs as any).classes || []) as string[]));
+            if (classes.has('collapsed')) {
+              classes.delete('collapsed');
+            } else {
+              classes.add('collapsed');
+            }
+            const attrs = { ...(nodeNow.attrs as any), classes: Array.from(classes) } as any;
+            const tr = this.view.state.tr.setNodeMarkup(pos, nodeNow.type, attrs);
+            this.view.dispatch(tr);
+          });
 
           const commit = () => {
             if (this.updating) return;
@@ -235,6 +255,8 @@ const extension = (_context: ExtensionContext): Extension => {
           try {
             const space = String(((node.attrs as any).space || ''));
             if (this.spaceInput.value !== space) this.spaceInput.value = space;
+            const collapsed = (((node.attrs as any).classes || []) as string[]).includes('collapsed');
+            if (collapsed) this.dom.classList.add('collapsed'); else this.dom.classList.remove('collapsed');
           } finally {
             this.updating = false;
           }
