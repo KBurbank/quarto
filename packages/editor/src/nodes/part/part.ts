@@ -395,6 +395,20 @@ const extension = (_context: ExtensionContext): Extension => {
           dom.appendChild(header);
           dom.appendChild(content);
 
+          // Edge grab hitboxes (avoid main editing area)
+          const edgeLeft = document.createElement('div');
+          edgeLeft.classList.add('part-edge', 'part-edge-left');
+          edgeLeft.setAttribute('contenteditable', 'false');
+          const edgeRight = document.createElement('div');
+          edgeRight.classList.add('part-edge', 'part-edge-right');
+          edgeRight.setAttribute('contenteditable', 'false');
+          const edgeBottom = document.createElement('div');
+          edgeBottom.classList.add('part-edge', 'part-edge-bottom');
+          edgeBottom.setAttribute('contenteditable', 'false');
+          dom.appendChild(edgeLeft);
+          dom.appendChild(edgeRight);
+          dom.appendChild(edgeBottom);
+
           // Wire events
           const commit = () => {
             if (this.updating) return;
@@ -424,6 +438,17 @@ const extension = (_context: ExtensionContext): Extension => {
             const tr = this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos));
             this.view.dispatch(tr);
           });
+
+          const edgeSelect = (e: MouseEvent) => {
+            e.preventDefault();
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const tr = this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos));
+            this.view.dispatch(tr);
+          };
+          edgeLeft.addEventListener('mousedown', edgeSelect);
+          edgeRight.addEventListener('mousedown', edgeSelect);
+          edgeBottom.addEventListener('mousedown', edgeSelect);
 
           // Improve drag feedback by providing a higher-opacity drag image
           header.addEventListener('dragstart', (e: DragEvent) => {

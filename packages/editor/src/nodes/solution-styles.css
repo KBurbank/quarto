@@ -60,3 +60,17 @@
   outline: 2px solid #268bd2;
   background-color: rgba(38, 139, 210, 0.08);
 }
+
+/* Edge grab hitboxes */
+.solution { position: relative; }
+.solution-edge {
+  position: absolute;
+  z-index: 1;
+  cursor: grab;
+  opacity: 0.0;
+  transition: opacity 0.1s ease-in-out;
+}
+.solution-edge-left { left: -6px; top: 0; bottom: 0; width: 6px; }
+.solution-edge-right { right: -6px; top: 0; bottom: 0; width: 6px; }
+.solution-edge-bottom { left: 0; right: 0; bottom: -6px; height: 6px; }
+.solution:hover .solution-edge { opacity: 0.25; background: rgba(38,139,210,0.25); }

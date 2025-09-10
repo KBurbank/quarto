@@ -197,6 +197,20 @@ const extension = (_context: ExtensionContext): Extension => {
           dom.appendChild(header);
           dom.appendChild(content);
 
+          // Edge grab hitboxes
+          const edgeLeft = document.createElement('div');
+          edgeLeft.classList.add('solution-edge', 'solution-edge-left');
+          edgeLeft.setAttribute('contenteditable', 'false');
+          const edgeRight = document.createElement('div');
+          edgeRight.classList.add('solution-edge', 'solution-edge-right');
+          edgeRight.setAttribute('contenteditable', 'false');
+          const edgeBottom = document.createElement('div');
+          edgeBottom.classList.add('solution-edge', 'solution-edge-bottom');
+          edgeBottom.setAttribute('contenteditable', 'false');
+          dom.appendChild(edgeLeft);
+          dom.appendChild(edgeRight);
+          dom.appendChild(edgeBottom);
+
           // initialize collapsed class from attrs.classes
           const hasCollapsedClass = (((node.attrs as any).classes || []) as string[]).includes('collapsed');
           if (hasCollapsedClass) dom.classList.add('collapsed');
@@ -253,6 +267,17 @@ const extension = (_context: ExtensionContext): Extension => {
             const tr = this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos));
             this.view.dispatch(tr);
           });
+
+          const edgeSelect = (e: MouseEvent) => {
+            e.preventDefault();
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const tr = this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos));
+            this.view.dispatch(tr);
+          };
+          edgeLeft.addEventListener('mousedown', edgeSelect);
+          edgeRight.addEventListener('mousedown', edgeSelect);
+          edgeBottom.addEventListener('mousedown', edgeSelect);
 
           header.addEventListener('dragstart', (e: DragEvent) => {
             if (!e.dataTransfer) return;
