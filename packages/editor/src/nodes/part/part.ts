@@ -372,7 +372,6 @@ const extension = (_context: ExtensionContext): Extension => {
           titleInput.type = 'text';
           titleInput.value = String((node.attrs as any).title || '');
           titleInput.placeholder = 'Title';
-          titleInput.disabled = true;
           header.appendChild(titleInput);
 
           const pointsInput = document.createElement('input');
@@ -380,7 +379,6 @@ const extension = (_context: ExtensionContext): Extension => {
           pointsInput.type = 'text';
           pointsInput.value = String((node.attrs as any).points || '');
           pointsInput.placeholder = 'Points';
-          pointsInput.disabled = true;
           header.appendChild(pointsInput);
 
           // (trashcan removed per request)
@@ -412,21 +410,7 @@ const extension = (_context: ExtensionContext): Extension => {
           titleInput.addEventListener('input', commit);
           pointsInput.addEventListener('input', commit);
 
-          // Enable inputs only on direct interaction
-          const enableInput = (input: HTMLInputElement) => {
-            if (input.disabled) {
-              input.disabled = false;
-              // Focus after enabling so the user can edit immediately
-              setTimeout(() => {
-                input.focus();
-                // place caret at end
-                const len = input.value.length;
-                input.setSelectionRange(len, len);
-              }, 0);
-            }
-          };
-          titleInput.addEventListener('mousedown', () => enableInput(titleInput));
-          pointsInput.addEventListener('mousedown', () => enableInput(pointsInput));
+          // Inputs are always editable; header container is non-editable
           // Select the whole node on header mousedown to enable native drag of the block
           header.addEventListener('mousedown', (e) => {
             const el = e.target as HTMLElement | null;
@@ -438,6 +422,19 @@ const extension = (_context: ExtensionContext): Extension => {
             this.view.dispatch(tr);
           });
 
+          // When the node is selected, move caret to the end of content on any key press
+          header.addEventListener('keydown', (e: KeyboardEvent) => {
+            const sel = this.view.state.selection;
+            if (!(sel instanceof NodeSelection)) return;
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const nodeNow = this.view.state.doc.nodeAt(pos);
+            if (!nodeNow) return;
+            const endPos = pos + nodeNow.nodeSize - 1; // inside end
+            const tr = this.view.state.tr.setSelection(TextSelection.create(this.view.state.doc, endPos));
+            this.view.dispatch(tr);
+          });
+
           this.dom = dom;
           this.contentDOM = content;
           this.titleInput = titleInput;
@@ -446,8 +443,8 @@ const extension = (_context: ExtensionContext): Extension => {
 
         selectNode() {
           // Ensure inputs aren't simultaneously selected when the node is selected
-          if (this.titleInput) { this.titleInput.blur(); this.titleInput.disabled = true; }
-          if (this.pointsInput) { this.pointsInput.blur(); this.pointsInput.disabled = true; }
+          if (this.titleInput) { this.titleInput.blur(); }
+          if (this.pointsInput) { this.pointsInput.blur(); }
         }
 
         deselectNode() {
