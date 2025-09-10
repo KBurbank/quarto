@@ -234,7 +234,41 @@ const extension = (_context: ExtensionContext): Extension => {
             const tr = this.view.state.tr.setNodeMarkup(pos, nodeNow.type, attrs);
             this.view.dispatch(tr);
           };
-          label.addEventListener('click', () => { toggle(); });
+          label.addEventListener('click', (e) => {
+            const me = e as MouseEvent;
+            if (me.metaKey || me.ctrlKey) {
+              const pos = this.getPos();
+              if (typeof pos !== 'number') return;
+              const nodeNow = this.view.state.doc.nodeAt(pos);
+              if (!nodeNow) return;
+              const currentlyCollapsed = new Set<string>((((nodeNow.attrs as any).classes || []) as string[])).has('collapsed');
+              const shouldCollapseAll = !currentlyCollapsed;
+              const solutionType = (this.view.state.schema.nodes as any).solution;
+              const positions: number[] = [];
+              this.view.state.doc.descendants((n, p) => {
+                if (n.type === solutionType) positions.push(p);
+                return true;
+              });
+              let tr = this.view.state.tr;
+              let changed = false;
+              for (const p of positions) {
+                const mapped = tr.mapping.map(p);
+                const n = tr.doc.nodeAt(mapped);
+                if (!n) continue;
+                const classes = new Set<string>((((n.attrs as any).classes || []) as string[]));
+                const has = classes.has('collapsed');
+                if (shouldCollapseAll && !has) { classes.add('collapsed'); changed = true; }
+                if (!shouldCollapseAll && has) { classes.delete('collapsed'); changed = true; }
+                if (changed) {
+                  const attrs = { ...(n.attrs as any), classes: Array.from(classes) } as any;
+                  tr = tr.setNodeMarkup(mapped, n.type, attrs);
+                }
+              }
+              if (changed) this.view.dispatch(tr);
+            } else {
+              toggle();
+            }
+          });
           label.addEventListener('keydown', (e: KeyboardEvent) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
