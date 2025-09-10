@@ -64,7 +64,7 @@ const extension = (_context: ExtensionContext): Extension => {
             title: { default: '' },
             points: { default: '' },
           },
-          content: 'block*',
+          content: 'block+',
           group: 'block',
           isolating: true,
           defining: true,

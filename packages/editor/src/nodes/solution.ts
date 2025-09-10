@@ -50,7 +50,7 @@ const extension = (_context: ExtensionContext): Extension => {
             space: { default: '' },
           },
           group: 'block',
-          content: 'block*',
+          content: 'block+',
           isolating: true,
           defining: true,
           allowGapCursor: true,
@@ -159,7 +159,7 @@ const extension = (_context: ExtensionContext): Extension => {
       return [insertSolution];
     },
 
-    plugins: (schema: Schema) => {
+    plugins: (_schema: Schema) => {
       class SolutionNodeView implements NodeView {
         public dom: HTMLElement;
         public contentDOM: HTMLElement;
@@ -300,25 +300,6 @@ const extension = (_context: ExtensionContext): Extension => {
               },
             },
           },
-        }),
-        // Ensure Solution nodes never become empty by auto-inserting a paragraph
-        new Plugin({
-          appendTransaction: (_trs, _old, newState) => {
-            const solutionType = (schema.nodes as any).solution;
-            const paraType = (schema.nodes as any).paragraph;
-            if (!paraType) return undefined;
-            let tr: Transaction | null = null as any;
-            newState.doc.descendants((node, pos) => {
-              if (node.type === solutionType && node.childCount === 0) {
-                const para = paraType.createAndFill();
-                if (para) {
-                  tr = (tr || newState.tr).insert(pos + 1, para);
-                }
-              }
-              return true;
-            });
-            return tr || undefined;
-          }
         }),
       ];
     },
