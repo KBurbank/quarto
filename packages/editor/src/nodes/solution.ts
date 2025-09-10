@@ -266,18 +266,6 @@ const extension = (_context: ExtensionContext): Extension => {
             setTimeout(() => { try { document.body.removeChild(dragImg); } catch { } }, 0);
           });
 
-          // If already selected, prevent text selection on content mousedown so drag moves the whole node
-          dom.addEventListener('mousedown', (e) => {
-            const el = e.target as HTMLElement | null;
-            if (el && (el.closest && el.closest('input'))) return;
-            const pos = this.getPos();
-            if (typeof pos !== 'number') return;
-            const sel = this.view.state.selection;
-            if (sel instanceof NodeSelection && sel.from === pos) {
-              e.preventDefault();
-            }
-          });
-
           this.dom = dom;
           this.contentDOM = content;
           this.spaceInput = spaceInput;
@@ -317,10 +305,12 @@ const extension = (_context: ExtensionContext): Extension => {
         selectNode() {
           this.dom.classList.add('node-selected');
           if (this.spaceInput) this.spaceInput.blur();
+          this.contentDOM.setAttribute('contenteditable', 'false');
         }
 
         deselectNode() {
           this.dom.classList.remove('node-selected');
+          this.contentDOM.removeAttribute('contenteditable');
         }
       }
 
