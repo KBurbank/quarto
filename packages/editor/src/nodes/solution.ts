@@ -50,7 +50,7 @@ const extension = (_context: ExtensionContext): Extension => {
             space: { default: '' },
           },
           group: 'block',
-          content: 'block+',
+          content: 'block*',
           isolating: true,
           defining: true,
           allowGapCursor: true,
@@ -298,6 +298,25 @@ const extension = (_context: ExtensionContext): Extension => {
               solution(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
                 return new SolutionNodeView(node, view, getPos);
               },
+            },
+          },
+        }),
+        new Plugin({
+          props: {
+            handleKeyDown(view, event) {
+              if (event.key !== 'Backspace') return false;
+              const state = view.state;
+              if (!(state.selection instanceof TextSelection) || !state.selection.empty) return false;
+              const depth = findSolutionDepth(state, _schema);
+              if (depth == null) return false;
+              const $from = state.selection.$from;
+              if ($from.index(depth) !== 0) return false;
+              if ($from.parentOffset !== 0) return false;
+              const container = $from.node(depth);
+              if (container.childCount === 1) {
+                return true;
+              }
+              return false;
             },
           },
         }),

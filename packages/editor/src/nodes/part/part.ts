@@ -486,6 +486,26 @@ const extension = (_context: ExtensionContext): Extension => {
         gapCursor(),
         new Plugin({
           props: {
+            handleKeyDown(view, event) {
+              if (event.key !== 'Backspace') return false;
+              const state = view.state;
+              if (!(state.selection instanceof TextSelection) || !state.selection.empty) return false;
+              const depth = findPartDepth(state, schema);
+              if (depth == null) return false;
+              const $from = state.selection.$from;
+              // ensure caret is at start of first child within the Part
+              if ($from.index(depth) !== 0) return false;
+              if ($from.parentOffset !== 0) return false;
+              const container = $from.node(depth);
+              if (container.childCount === 1) {
+                return true; // block exiting the Part
+              }
+              return false;
+            },
+          },
+        }),
+        new Plugin({
+          props: {
             nodeViews: {
               part(node: ProsemirrorNode, view: EditorView, getPos: boolean | (() => number)) {
                 return new PartNodeView(node, view, getPos);
@@ -493,7 +513,7 @@ const extension = (_context: ExtensionContext): Extension => {
             },
           },
         }),
-        
+
         // Auto-insert a paragraph when clicking at a gap position inside a Part
         new Plugin({
           props: {
