@@ -263,7 +263,19 @@ const extension = (_context: ExtensionContext): Extension => {
             dragImg.style.left = '-99999px';
             document.body.appendChild(dragImg);
             e.dataTransfer.setDragImage(dragImg, 16, 16);
-            setTimeout(() => { try { document.body.removeChild(dragImg); } catch {} }, 0);
+            setTimeout(() => { try { document.body.removeChild(dragImg); } catch { } }, 0);
+          });
+
+          // If already selected, prevent text selection on content mousedown so drag moves the whole node
+          dom.addEventListener('mousedown', (e) => {
+            const el = e.target as HTMLElement | null;
+            if (el && (el.closest && el.closest('input'))) return;
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const sel = this.view.state.selection;
+            if (sel instanceof NodeSelection && sel.from === pos) {
+              e.preventDefault();
+            }
           });
 
           this.dom = dom;
