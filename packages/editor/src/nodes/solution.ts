@@ -254,6 +254,18 @@ const extension = (_context: ExtensionContext): Extension => {
             this.view.dispatch(tr);
           });
 
+          header.addEventListener('dragstart', (e: DragEvent) => {
+            if (!e.dataTransfer) return;
+            const dragImg = dom.cloneNode(true) as HTMLElement;
+            dragImg.style.pointerEvents = 'none';
+            dragImg.style.opacity = '0.95';
+            dragImg.style.position = 'absolute';
+            dragImg.style.left = '-99999px';
+            document.body.appendChild(dragImg);
+            e.dataTransfer.setDragImage(dragImg, 16, 16);
+            setTimeout(() => { try { document.body.removeChild(dragImg); } catch {} }, 0);
+          });
+
           this.dom = dom;
           this.contentDOM = content;
           this.spaceInput = spaceInput;
@@ -289,7 +301,7 @@ const extension = (_context: ExtensionContext): Extension => {
           }
           return false;
         }
-        
+
         selectNode() {
           this.dom.classList.add('node-selected');
           if (this.spaceInput) this.spaceInput.blur();

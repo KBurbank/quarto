@@ -73,5 +73,12 @@
 .part[data-struct-level="4"] > .part-header .part-label::before { content: "Subsubpart " counter(subsubpart, lower-roman) ": "; }
 
 /* When the node is selected, suppress browser text selection paint */
-.part.node-selected, .part.node-selected * { user-select: none; -webkit-user-select: none; }
-.part.node-selected ::selection { background: transparent; color: inherit; }
+.part.node-selected, .part.node-selected * { user-select: none !important; -webkit-user-select: none !important; }
+.part.node-selected ::selection { background: transparent !important; color: inherit !important; }
+.part.node-selected ::-moz-selection { background: transparent !important; color: inherit !important; }
+
+/* Visible selected state */
+.part.node-selected {
+  outline: 2px solid #268bd2; /* solarized blue */
+  background-color: rgba(38, 139, 210, 0.08);
+}

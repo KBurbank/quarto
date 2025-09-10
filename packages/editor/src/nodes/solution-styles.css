@@ -30,5 +30,12 @@
 .solution.collapsed > .solution-content { display: none; }
 
 /* When the node is selected, suppress browser text selection paint */
-.solution.node-selected, .solution.node-selected * { user-select: none; -webkit-user-select: none; }
-.solution.node-selected ::selection { background: transparent; color: inherit; }
+.solution.node-selected, .solution.node-selected * { user-select: none !important; -webkit-user-select: none !important; }
+.solution.node-selected ::selection { background: transparent !important; color: inherit !important; }
+.solution.node-selected ::-moz-selection { background: transparent !important; color: inherit !important; }
+
+/* Visible selected state */
+.solution.node-selected {
+  outline: 2px solid #268bd2;
+  background-color: rgba(38, 139, 210, 0.08);
+}
