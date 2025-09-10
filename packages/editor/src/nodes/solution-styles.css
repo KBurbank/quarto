@@ -15,7 +15,6 @@
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
-.solution-header { user-select: none; }
 .solution-header .solution-label::before { content: "▾ Solution:"; display: inline-block; }
 .solution.collapsed > .solution-header .solution-label::before { content: "▸ Solution:"; }
 
@@ -45,6 +44,24 @@
   border-radius: 4px;
   margin: 0.25rem 0;
   display: inline-block;
+}
+
+/* Suppress native selection paint on header, but allow inputs to select */
+.solution-header {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.solution-header input {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+
+/* Highlight selected Solution node with blue border */
+.ProseMirror-selectednode.solution {
+  border-color: #268bd2;
+  box-shadow: 0 0 0 2px rgba(38, 141, 210, 0.15);
 }
 
 .solution-header .solution-label { cursor: pointer; user-select: none; }
