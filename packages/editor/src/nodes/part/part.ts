@@ -576,6 +576,12 @@ const extension = (_context: ExtensionContext): Extension => {
                 view.dispatch(tr);
                 return true;
               }
+              if (event.key === 'Escape') {
+                const $pos = view.state.doc.resolve(sel.to);
+                const tr = view.state.tr.setSelection(TextSelection.near($pos, 1)).scrollIntoView();
+                view.dispatch(tr);
+                return true;
+              }
               event.preventDefault();
               return true;
             },
