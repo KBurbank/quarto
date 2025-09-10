@@ -4,8 +4,9 @@
 
 import { Node as ProsemirrorNode, DOMOutputSpec, Schema } from 'prosemirror-model';
 import { Extension, ExtensionContext } from '../../api/extension';
-import { EditorState, Transaction, Plugin, PluginKey, TextSelection } from 'prosemirror-state';
+import { EditorState, Transaction, Plugin, PluginKey, TextSelection, NodeSelection } from 'prosemirror-state';
 import { DecorationSet, Decoration, EditorView, NodeView } from 'prosemirror-view';
+import { dropCursor } from 'prosemirror-dropcursor';
 import { gapCursor } from 'prosemirror-gapcursor';
 import './part-styles.css';
 import { ProsemirrorCommand } from '../../api/command';
@@ -67,6 +68,7 @@ const extension = (_context: ExtensionContext): Extension => {
           group: 'block',
           isolating: true,
           defining: true,
+          draggable: true,
           allowGapCursor: true,
           parseDOM: [
             {
@@ -358,6 +360,8 @@ const extension = (_context: ExtensionContext): Extension => {
           // Outer container
           const dom = document.createElement('div');
           dom.classList.add('part');
+          // allow dragging the entire part block
+          dom.draggable = true;
 
           // Header
           const header = document.createElement('div');
@@ -409,11 +413,14 @@ const extension = (_context: ExtensionContext): Extension => {
 
           titleInput.addEventListener('input', commit);
           pointsInput.addEventListener('input', commit);
-          // Prevent clicks on header chrome from moving the insertion point
+          // Select the whole node on header mousedown to enable native drag of the block
           header.addEventListener('mousedown', (e) => {
             const el = e.target as HTMLElement | null;
-            if (el && (el === titleInput || el === pointsInput || el.closest('input'))) return;
-            e.preventDefault();
+            if (el && (el === titleInput || el === pointsInput || (el.closest && el.closest('input')))) return;
+            const pos = this.getPos();
+            if (typeof pos !== 'number') return;
+            const tr = this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos));
+            this.view.dispatch(tr);
           });
 
           this.dom = dom;
@@ -478,6 +485,7 @@ const extension = (_context: ExtensionContext): Extension => {
       }
 
       return [
+        dropCursor({ color: '#268bd2', width: 3 }),
         gapCursor(),
         new Plugin({
           props: {
