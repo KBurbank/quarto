@@ -102,13 +102,7 @@ const extension = (_context: ExtensionContext): Extension => {
           // use default createAndFill
         },
 
-        // native attribute editor hook (kebab button on the right)
-        attr_edit: () => ({
-          type: (schema: Schema) => (schema.nodes as any).part,
-          // no extra tag chips; only show the three-dots button
-          tags: () => [],
-          offset: { top: 3, right: 0 },
-        }),
+
         pandoc: {
           readers: [
             {
@@ -386,6 +380,8 @@ const extension = (_context: ExtensionContext): Extension => {
           pointsInput.value = String((node.attrs as any).points || '');
           pointsInput.placeholder = 'Points';
           header.appendChild(pointsInput);
+
+          // (trashcan removed per request)
 
           // Content container
           const content = document.createElement('div');

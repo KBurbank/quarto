@@ -11,12 +11,14 @@ format:
       filters: ["../part-filter.lua"]
 ---
 
-::: {.part title="This is a great ?"}
-another part is right here!
-:::
-
 ::: {.part points="3"}
 some content, this was initially question 1
+:::
+
+::: {.part title="This is a great ?"}
+another part is right here!
+
+This is a solution block...
 :::
 
 ::: {.part title="Some other title" points="23"}
