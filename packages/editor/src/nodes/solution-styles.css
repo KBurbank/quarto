@@ -5,6 +5,11 @@
   margin: 0.5rem 0;
 }
 
+/* Slightly lighten nested Solution borders similar to nested Parts */
+.solution .solution {
+  border-color: var(--pm-block-border-color, #c7c7c7);
+}
+
 .solution-header {
   display: block;
   font-weight: 600;
@@ -13,3 +18,10 @@
 .solution-header .solution-label::before { content: "Solution:"; }
 
 .solution-content { margin-left: 0.5rem; }
+
+/* Layout header similarly to Part headers */
+.solution-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
