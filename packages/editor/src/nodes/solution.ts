@@ -202,7 +202,10 @@ const extension = (_context: ExtensionContext): Extension => {
           if (hasCollapsedClass) dom.classList.add('collapsed');
 
           // toggle persisted 'collapsed' class on click of label
-          label.addEventListener('click', (e) => {
+          label.title = 'Click to fold/unfold';
+          label.setAttribute('role', 'button');
+          label.setAttribute('tabindex', '0');
+          const toggle = () => {
             e.preventDefault();
             const pos = this.getPos();
             if (typeof pos !== 'number') return;
@@ -217,6 +220,13 @@ const extension = (_context: ExtensionContext): Extension => {
             const attrs = { ...(nodeNow.attrs as any), classes: Array.from(classes) } as any;
             const tr = this.view.state.tr.setNodeMarkup(pos, nodeNow.type, attrs);
             this.view.dispatch(tr);
+          };
+          label.addEventListener('click', (e) => { toggle(); });
+          label.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggle();
+            }
           });
 
           const commit = () => {

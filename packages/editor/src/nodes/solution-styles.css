@@ -15,7 +15,8 @@
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
-.solution-header .solution-label::before { content: "Solution:"; }
+.solution-header .solution-label::before { content: "▾ Solution:"; display: inline-block; }
+.solution.collapsed > .solution-header .solution-label::before { content: "▸ Solution:"; }
 
 .solution-content { margin-left: 0.5rem; }
 
@@ -44,3 +45,5 @@
   margin: 0.25rem 0;
   display: inline-block;
 }
+
+.solution-header .solution-label { cursor: pointer; user-select: none; }
