@@ -19,6 +19,9 @@
 
 .solution-content { margin-left: 0.5rem; }
 
+/* Collapsible behavior */
+.solution.collapsed > .solution-content { display: none; }
+
 /* Layout header similarly to Part headers */
 .solution-header {
   display: flex;
