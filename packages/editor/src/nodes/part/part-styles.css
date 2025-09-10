@@ -18,6 +18,28 @@
 
 .part-content { margin-left: 0.5rem; }
 
+/* Layout header with title filling space and points compact/right-aligned */
+.part-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.part-header .part-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.part-header .part-points {
+  flex: 0 0 auto;
+  width: 4ch; /* enough for up to 100 */
+  text-align: center;
+  margin-left: auto; /* pin to right edge even if title is hidden */
+}
+
+/* Hide the title input for non-top-level (level != 1) parts */
+.part[data-struct-level]:not([data-struct-level="1"]) .part-header .part-title {
+  display: none;
+}
+
 /* Part title and points styling */
 .part-title {
   background-color: lightblue;

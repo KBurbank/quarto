@@ -126,7 +126,13 @@ const extension = (_context: ExtensionContext): Extension => {
                 const points = (attr.keyvalue || []).find(([k]: [string, string]) => k === 'points')?.[1] || '';
                 return { ...attr, title, points } as { [key: string]: unknown };
               },
-              getChildren: (tok: PandocToken) => (tok.c[1] as PandocToken[]),
+              getChildren: (tok: PandocToken) => {
+                const children = (tok.c[1] as PandocToken[]) || [];
+                if (children.length === 0) {
+                  return [{ t: 'Para', c: [] } as unknown as PandocToken];
+                }
+                return children;
+              },
             },
           ],
           writer: (output: PandocOutput, node) => {
@@ -356,6 +362,8 @@ const extension = (_context: ExtensionContext): Extension => {
           // Header
           const header = document.createElement('div');
           header.classList.add('part-header');
+          // Prevent caret/selection in header (except inputs)
+          header.setAttribute('contenteditable', 'false');
 
           const label = document.createElement('span');
           label.classList.add('part-label');
@@ -401,6 +409,12 @@ const extension = (_context: ExtensionContext): Extension => {
 
           titleInput.addEventListener('input', commit);
           pointsInput.addEventListener('input', commit);
+          // Prevent clicks on header chrome from moving the insertion point
+          header.addEventListener('mousedown', (e) => {
+            const el = e.target as HTMLElement | null;
+            if (el && (el === titleInput || el === pointsInput || el.closest('input'))) return;
+            e.preventDefault();
+          });
 
           this.dom = dom;
           this.contentDOM = content;
