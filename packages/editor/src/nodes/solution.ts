@@ -324,6 +324,39 @@ const extension = (_context: ExtensionContext): Extension => {
             },
           },
         }),
+        // While a Solution node is selected, limit typing and support navigation
+        new Plugin({
+          props: {
+            handleKeyDown(view, event) {
+              const sel = view.state.selection;
+              if (!(sel instanceof NodeSelection) || !isSolution(sel.node, _schema)) return false;
+              if (event.key === 'Backspace') return false;
+              if (event.key === 'Tab') return false;
+              if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+                const $pos = view.state.doc.resolve(sel.from);
+                const tr = view.state.tr.setSelection(TextSelection.near($pos, -1)).scrollIntoView();
+                view.dispatch(tr);
+                return true;
+              }
+              if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+                const $pos = view.state.doc.resolve(sel.to);
+                const tr = view.state.tr.setSelection(TextSelection.near($pos, 1)).scrollIntoView();
+                view.dispatch(tr);
+                return true;
+              }
+              if (event.key === 'Enter') {
+                const pos = sel.from;
+                const node = sel.node;
+                const insideEnd = pos + node.nodeSize - 1;
+                const tr = view.state.tr.setSelection(TextSelection.create(view.state.doc, insideEnd)).scrollIntoView();
+                view.dispatch(tr);
+                return true;
+              }
+              event.preventDefault();
+              return true;
+            },
+          },
+        }),
         new Plugin({
           props: {
             handleKeyDown(view, event) {

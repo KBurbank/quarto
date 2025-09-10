@@ -555,6 +555,19 @@ const extension = (_context: ExtensionContext): Extension => {
               // Allow Backspace (delete the node), Tab/Shift-Tab (indent/outdent via baseKeys)
               if (event.key === 'Backspace') return false;
               if (event.key === 'Tab') return false; // includes Shift-Tab via event.shiftKey
+              // Arrow keys: exit selection with caret before/after the node
+              if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+                const $pos = view.state.doc.resolve(sel.from);
+                const tr = view.state.tr.setSelection(TextSelection.near($pos, -1)).scrollIntoView();
+                view.dispatch(tr);
+                return true;
+              }
+              if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+                const $pos = view.state.doc.resolve(sel.to);
+                const tr = view.state.tr.setSelection(TextSelection.near($pos, 1)).scrollIntoView();
+                view.dispatch(tr);
+                return true;
+              }
               if (event.key === 'Enter') {
                 const pos = sel.from;
                 const node = sel.node;
