@@ -11,42 +11,6 @@ format:
       filters: ["../part-filter.lua"]
 ---
 
-:::::: {.part title="An initial question" points="5"}
-content, right here.
-
-$$
-e=mc^2
-$$
-
-::::: {.part title="Good times dude" points="10"}
-
-:::: part
-aha!
-
-::: solution
-Here is another solution!
-
-``` latex
-\begin{center}
-code
-\end{center}
-```
+::: {.part title="a title" points="10"}
+content
 :::
-::::
-:::::
-::::::
-
-::: {.part title="Part"}
-This is pretty cool!
-:::
-
-Some more content
-
-``` latex
-{r}
-```
-
-```{r}
-7+8
-
-```
