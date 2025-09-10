@@ -15,13 +15,9 @@
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
-.solution-header .solution-label::before { content: "▾ Solution:"; display: inline-block; }
-.solution.collapsed > .solution-header .solution-label::before { content: "▸ Solution:"; }
+.solution-header .solution-label::before { content: "Solution:"; }
 
 .solution-content { margin-left: 0.5rem; }
-
-/* Collapsible behavior */
-.solution.collapsed > .solution-content { display: none; }
 
 /* Layout header similarly to Part headers */
 .solution-header {
@@ -46,22 +42,15 @@
   display: inline-block;
 }
 
-/* Suppress native selection paint on header, but allow inputs to select */
-.solution-header {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-}
-.solution-header input {
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  user-select: text;
-}
+/* Collapsible behavior */
+.solution.collapsed > .solution-content { display: none; }
 
-/* Highlight selected Solution node with blue border */
-.ProseMirror-selectednode.solution {
-  border-color: #268bd2;
-  box-shadow: 0 0 0 2px rgba(38, 141, 210, 0.15);
-}
-
+/* Fold indicator and clickable label */
 .solution-header .solution-label { cursor: pointer; user-select: none; }
+.solution-header .solution-label::before { content: "▾ Solution:"; display: inline-block; }
+.solution.collapsed > .solution-header .solution-label::before { content: "▸ Solution:"; }
+
+/* When the Solution node is selected, suppress native text selection paint */
+.ProseMirror-selectednode.solution * { user-select: none; }
+.ProseMirror-selectednode.solution *::selection { background: transparent; color: inherit; }
+.ProseMirror-selectednode.solution *::-moz-selection { background: transparent; color: inherit; }

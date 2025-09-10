@@ -57,23 +57,10 @@
   display: inline-block;
 }
 
-/* Suppress native selection paint on header, but allow inputs to select */
-.part-header {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-}
-.part-header input {
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  user-select: text;
-}
-
-/* Highlight selected Part node with blue border */
-.ProseMirror-selectednode.part {
-  border-color: #268bd2;
-  box-shadow: 0 0 0 2px rgba(38, 141, 210, 0.15);
-}
+/* When the Part node is selected, suppress native text selection paint */
+.ProseMirror-selectednode.part * { user-select: none; }
+.ProseMirror-selectednode.part *::selection { background: transparent; color: inherit; }
+.ProseMirror-selectednode.part *::-moz-selection { background: transparent; color: inherit; }
 
 /* Dynamic headers by structural level with counters */
 :root { counter-reset: question; }
