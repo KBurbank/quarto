@@ -49,7 +49,8 @@ const extension = (_context: ExtensionContext): Extension => {
           attrs: {
             ...pandocAttrSpec,
           },
-          content: 'block+',
+          group: 'block',
+          content: 'block*',
           isolating: true,
           defining: true,
           allowGapCursor: true,
@@ -90,7 +91,13 @@ const extension = (_context: ExtensionContext): Extension => {
                 const attr = pandocAttrReadAST(tok, 0);
                 return { ...attr } as { [key: string]: unknown };
               },
-              getChildren: (tok: PandocToken) => tok.c[1],
+              getChildren: (tok: PandocToken) => {
+                const children = (tok.c[1] as PandocToken[]) || [];
+                if (children.length === 0) {
+                  return [{ t: 'Para', c: [] } as unknown as PandocToken];
+                }
+                return children;
+              },
             },
           ],
           writer: (output: PandocOutput, node) => {
