@@ -197,7 +197,7 @@ const extension = (_context: ExtensionContext): Extension => {
           dom.appendChild(header);
           dom.appendChild(content);
 
-          header.addEventListener('dblclick', () => dom.classList.toggle('collapsed'));
+          label.addEventListener('click', (e) => { e.preventDefault(); dom.classList.toggle('collapsed'); });
 
           const commit = () => {
             if (this.updating) return;
