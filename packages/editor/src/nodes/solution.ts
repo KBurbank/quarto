@@ -206,7 +206,6 @@ const extension = (_context: ExtensionContext): Extension => {
           label.setAttribute('role', 'button');
           label.setAttribute('tabindex', '0');
           const toggle = () => {
-            e.preventDefault();
             const pos = this.getPos();
             if (typeof pos !== 'number') return;
             const nodeNow = this.view.state.doc.nodeAt(pos);
