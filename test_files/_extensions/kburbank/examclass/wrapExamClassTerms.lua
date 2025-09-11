@@ -34,7 +34,7 @@ local function processRawBlocks(el)
 
                 end
 
-  
+
                 -- Process the content inside the environment
                 local processed_content = pandoc.read(content, "markdown").blocks
                 -- Wrap the processed content with the environment tags

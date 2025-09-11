@@ -13,36 +13,31 @@ labels:
 toc-title: Table of contents
 ---
 
-\titledquestion[5]{An initial question}
+Some text here.
 
-content, right here.
+\titledquestion{The title for the first question}
 
-$$
-e=mc^2
-$$
-
-\begin{parts}
-\part[10] Good times dude
-
-more content!
-
-dude..
-
-\begin{subparts}
-\subpart
-
-aha!
-
-\end{subparts}
-\end{parts}
-\titledquestion{Part}
-
-This is pretty cool!
-
-Some more content
+oh this is pretty awesome now
 
 ``` {.r .cell-code}
-7+8
+3+4
 ```
 
-    [1] 15
+    [1] 7
+
+\begin{solution}[2.5in]
+
+This is another solution
+
+\end{solution}
+\begin{parts}
+\part[2]
+
+The second part.
+
+Suppose we have $e=mc^2$.
+
+\end{parts}
+\question
+
+Some text here...

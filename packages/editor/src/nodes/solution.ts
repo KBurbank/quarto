@@ -86,7 +86,7 @@ const extension = (_context: ExtensionContext): Extension => {
               match: (tok: PandocToken) => {
                 try {
                   const attr = pandocAttrReadAST(tok, 0);
-                  return Array.isArray(attr.classes) && attr.classes.includes('solution');
+                  return Array.isArray(attr.classes) && attr.classes.includes('examsolution');
                 } catch {
                   return false;
                 }
@@ -109,7 +109,7 @@ const extension = (_context: ExtensionContext): Extension => {
           writer: (output: PandocOutput, node) => {
             output.writeToken(PandocTokenType.Div, () => {
               const existingClasses = ((node.attrs as any).classes || []) as string[];
-              const classes = ['solution', ...existingClasses.filter(c => c !== 'solution')];
+              const classes = ['examsolution', ...existingClasses.filter(c => c !== 'examsolution')];
               const space = (node.attrs as any).space || '';
               const existingKv = (((node.attrs as any).keyvalue || []) as Array<[string, string]>).filter(([k]) => k !== 'space');
               const keyvalue: Array<[string, string]> = [];

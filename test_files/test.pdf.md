@@ -19,6 +19,11 @@ format:
       filters: ["../part-filter.lua"]
 ---
 
+
+
+
+
+
 Some text here.
 
 :::::: {.part title="The title of the first question"}
@@ -27,9 +32,29 @@ oh this is pretty awesome now
 ::: {.examsolution space=".5in"}
 This is another solution
 
-```{r}
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
 4+5
 ```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+[1] 9
+```
+
+
+:::
+:::
+
+
+
+
 :::
 
 ::: {.part points="2"}

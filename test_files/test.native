@@ -1,0 +1,62 @@
+Pandoc
+  Meta { unMeta = fromList [] }
+  [ Para
+      [ Str "Some" , Space , Str "text" , Space , Str "here." ]
+  , RawBlock
+      (Format "tex")
+      "\\titledquestion{The title for the first question}"
+  , Para
+      [ Str "oh"
+      , Space
+      , Str "this"
+      , Space
+      , Str "is"
+      , Space
+      , Str "pretty"
+      , Space
+      , Str "awesome"
+      , Space
+      , Str "now"
+      ]
+  , Div
+      ( "" , [ "cell" ] , [] )
+      [ CodeBlock ( "" , [ "r" , "cell-code" ] , [] ) "3+4"
+      , Div
+          ( "" , [ "cell-output" , "cell-output-stdout" ] , [] )
+          [ CodeBlock ( "" , [] , [] ) "[1] 7" ]
+      ]
+  , RawBlock (Format "tex") "\\begin{solution}[2.5in]"
+  , Para
+      [ Str "This"
+      , Space
+      , Str "is"
+      , Space
+      , Str "another"
+      , Space
+      , Str "solution"
+      ]
+  , RawBlock (Format "tex") "\\end{solution}"
+  , RawBlock (Format "tex") "\\begin{parts}"
+  , RawBlock (Format "tex") "\\part[2]"
+  , Para
+      [ Str "The" , Space , Str "second" , Space , Str "part." ]
+  , Para
+      [ Str "Suppose"
+      , Space
+      , Str "we"
+      , Space
+      , Str "have"
+      , Space
+      , Math InlineMath "e=mc^2"
+      , Str "."
+      ]
+  , RawBlock (Format "tex") "\\end{parts}"
+  , RawBlock (Format "tex") "\\question"
+  , Para
+      [ Str "Some"
+      , Space
+      , Str "text"
+      , Space
+      , Str "here\8230"
+      ]
+  ]
